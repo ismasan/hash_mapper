@@ -62,32 +62,3 @@ describe ManyLevels do
   end
   
 end
-
-describe "hashes" do
-  before :all do
-    @input = {:a => {:b => {:c => 666}}}
-    @m = [:a, :b, :c]
-    @l = lambda {|h,e|
-      h[e]
-    }
-  end
-  
-  it "should get to the end" do
-    @m.inject(@input, &@l).should === 666
-  end
-  
-  it "should return nil if not in hash" do
-    [:a, :b, :c, :d].inject(@input, &@l).should === nil
-  end
-  
-  it "should build tree" do
-    output = {}
-    
-    incoming  = {:z => {:fox => 44}}
-    map_from  = [:z,:fox]
-    map_to    = [:a, :b, :c, :d]
-    
-    map_to.inject(output){|h,e|h[e] = (e == map_to.last ? map_from.inject(incoming){|h,e| h[e]} : {})}
-    output.should == {:a => {:b => {:c => {:d => 44}}}}
-  end
-end

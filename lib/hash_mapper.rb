@@ -22,8 +22,8 @@ module HashMapper
     output = {}
     maps.each do |path_from, path_to|
         path_to.inject(output){|h,e|
-          if h[e].kind_of?(Hash)
-            h[e] = (e == path_to.last ? path_from.inject(incoming_hash){|hh,ee| hh[ee]} : {})
+          if h[e]
+            h[e]
           else
             h[e] = (e == path_to.last ? path_from.inject(incoming_hash){|hh,ee| hh[ee]} : {})
           end
