@@ -12,8 +12,8 @@ module HashMapper
     self.maps << [from, to]
   end
   
-  def from(path)
-    PathMap.new(path)
+  def from(path, coerce_method = nil)
+    PathMap.new(path, coerce_method)
   end
   
   alias :to :from
@@ -26,8 +26,7 @@ module HashMapper
           if h[e]
             h[e]
           else
-            puts e.inspect
-            h[e] = (e == path_to.last ? path_from.inject(incoming_hash){|hh,ee| hh[ee]} : {})
+            h[e] = (e == path_to.last ? path_to.coerce(path_from.extract(path_from.inject(incoming_hash){|hh,ee| hh[ee]})) : {})
           end
         }
     end
@@ -49,13 +48,21 @@ module HashMapper
     
     attr_reader :segments
     
-    def initialize(path)
-      @path = path
+    def initialize(path, coerce_method = nil)
+      @path = path.dup
+      @coerce_method = coerce_method
+      @index = extract_array_index!(path)
       @segments = parse(path)
     end
     
-    def to_s
-      @path
+    def coerce(value)
+      return value unless @coerce_method
+      value.send(@coerce_method) rescue value
+    end
+    
+    def extract(value)
+      return value unless @index
+      value.to_a[@index]
     end
     
     def each(&blk)
@@ -68,10 +75,19 @@ module HashMapper
     
     private
     
+    def extract_array_index!(path)
+      path.gsub! /(\[[0-9]+\])/, ''
+      if idx = $1
+        idx.gsub(/(\[|\])/, '').to_i
+      else
+        nil
+      end
+    end
+    
     def parse(path)
-      path = path.split('/')
-      path.shift
-      path.collect{|e| e.to_sym}
+      p = path.split('/')
+      p.shift
+      p.collect{|e| e.to_sym}
     end
     
   end
