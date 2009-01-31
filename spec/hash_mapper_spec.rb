@@ -138,4 +138,87 @@ describe "array indexes" do
   end
 end
 
+class PersonWithBlock
+  extend HashMapper
+  
+  map from('/names/first'), to('/first_name') do |name|
+    "+++ #{name} +++"
+  end
+end
+
+describe "with blocks filters" do
+  before :each do
+    @from = {
+      :names => {:first => 'Ismael'}
+    }
+    @to = {
+      :first_name => '+++ Ismael +++'
+    }
+  end
+  
+  it "should pass final value through given block" do
+    PersonWithBlock.translate(@from).should == @to
+  end
+end
+
+class ProjectMapper
+  extend HashMapper
+  
+  map from('/name'),        to('/project_name')
+  map from('/author_hash'), to('/author'), &PersonWithBlock
+end
+
+describe "with nested mapper" do
+  before :each do
+    @from ={
+      :name => 'HashMapper',
+      :author_hash => {
+        :names => {:first => 'Ismael'}
+      }
+    }
+    @to = {
+      :project_name => 'HashMapper',
+      :author => {:first_name => '+++ Ismael +++'}
+    }
+  end
+  
+  it "should delegate nested hashes to another mapper" do
+    ProjectMapper.translate(@from).should == @to
+  end
+end
+
+class CompanyMapper
+  extend HashMapper
+  
+  map from('/name'),      to('/company_name')
+  map from('/employees'), to('/employees') do |employees_array|
+    employees_array.collect{|emp_hash| PersonWithBlock.translate(emp_hash)}
+  end
+end
+
+describe "with arrays of nested hashes" do
+  before :each do
+    @from = {
+      :name => 'New Bamboo',
+      :employees => [
+        {:names => {:first => 'Ismael'}},
+        {:names => {:first => 'Sachiyo'}},
+        {:names => {:first => 'Pedro'}}
+      ]
+    }
+    @to = {
+      :company_name => 'New Bamboo',
+      :employees => [
+        {:first_name => '+++ Ismael +++'},
+        {:first_name => '+++ Sachiyo +++'},
+        {:first_name => '+++ Pedro +++'}
+      ]
+    }
+  end
+  
+  it "should pass array value though given block mapper" do
+    CompanyMapper.translate(@from).should == @to
+  end
+end
+
 

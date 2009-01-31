@@ -8,7 +8,8 @@ module HashMapper
     @maps ||= []
   end
   
-  def map(from, to)
+  def map(from, to, &blk)
+    to.filter = blk if block_given?
     self.maps << [from, to]
   end
   
@@ -26,7 +27,7 @@ module HashMapper
           if h[e]
             h[e]
           else
-            h[e] = (e == path_to.last ? path_to.coerce(path_from.extract(path_from.inject(incoming_hash){|hh,ee| hh[ee]})) : {})
+            h[e] = (e == path_to.last ? path_to.resolve_value(path_from, incoming_hash) : {})
           end
         }
     end
@@ -42,25 +43,40 @@ module HashMapper
     end
   end
   
+  # This allows us to pass mapper classes as block arguments
+  #
+  def to_proc
+    Proc.new{|*args| self.translate(*args)}
+  end
+  
   class PathMap
     
     include Enumerable
     
     attr_reader :segments
     
+    attr_writer :filter
+    
     def initialize(path, coerce_method = nil)
       @path = path.dup
       @coerce_method = coerce_method
       @index = extract_array_index!(path)
       @segments = parse(path)
+      @filter = lambda{|value| value}# default filter does nothing
+    end
+    
+    def resolve_value(another_path, incoming_hash)
+      coerce another_path.extract_from(incoming_hash)
     end
     
     def coerce(value)
+      value = @filter.call(value)
       return value unless @coerce_method
       value.send(@coerce_method) rescue value
     end
     
-    def extract(value)
+    def extract_from(incoming_hash)
+      value = inject(incoming_hash){|hh,ee| hh[ee]}
       return value unless @index
       value.to_a[@index]
     end
