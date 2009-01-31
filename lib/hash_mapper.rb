@@ -20,16 +20,27 @@ module HashMapper
   
   def translate(incoming_hash)
     output = {}
+    incoming_hash = simbolize_keys(incoming_hash)
     maps.each do |path_from, path_to|
         path_to.inject(output){|h,e|
           if h[e]
             h[e]
           else
+            puts e.inspect
             h[e] = (e == path_to.last ? path_from.inject(incoming_hash){|hh,ee| hh[ee]} : {})
           end
         }
     end
     output
+  end
+  
+  # from http://www.geekmade.co.uk/2008/09/ruby-tip-normalizing-hash-keys-as-symbols/
+  #
+  def simbolize_keys(hash)
+    hash.inject({}) do |options, (key, value)|
+      options[(key.to_sym rescue key) || key] = value
+      options
+    end
   end
   
   class PathMap

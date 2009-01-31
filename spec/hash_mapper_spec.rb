@@ -27,6 +27,10 @@ describe OneLevel do
       OneLevel.translate(@from).should == @to
     end
     
+    it "should have indifferent access" do
+      OneLevel.translate({'name' => 'ismael'}).should == @to
+    end
+    
   end
   
 end
