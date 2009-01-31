@@ -109,10 +109,12 @@ Do this:
 == INSTALL:
 
 # If you haven't done this already:
-gem sources -a http://gems.github.com
+
+   gem sources -a http://gems.github.com
 
 # Now install
-sudo gem install ismasan-hash_mapper
+
+   sudo gem install ismasan-hash_mapper
 
 == LICENSE:
 
