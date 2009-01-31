@@ -1,26 +1,118 @@
 = hash_mapper
 
-* FIX (url)
+* http://github.com/ismasan/hash_mapper
 
 == DESCRIPTION:
 
-FIX (describe your package)
+Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json).
+ 
+HashMapper is a tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.
 
 == FEATURES/PROBLEMS:
 
-* FIX (list of features or problems)
+It is a module so it doesn't get in the way of your inheritance tree.
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+   class ManyLevels
+     extend HashMapper
+     map from('/name'),            to('/tag_attributes/name')
+     map from('/properties/type'), to('/tag_attributes/type')
+     map from('/tagid'),           to('/tag_id')
+     map from('/properties/egg'),  to('/chicken')
+   end
+
+   input = 	{
+     :name => 'ismael',
+     :tagid => 1,
+     :properties => {
+       :type => 'BLAH',
+       :egg => 33
+     }
+   }
+
+   ManyLevels.translate(input)
+
+   # outputs:
+   	{
+     :tag_id => 1,
+     :chicken => 33,
+     :tag_attributes => {
+       :name => 'ismael',
+       :type => 'BLAH'
+     }
+   }
+
+=== Uses:
+
+HashMapper was primarily written as a way of mapping data structure in json requests to hashes with structures friendlier to our ActiveRecord models:
+
+   @article = Article.create( ArticleParams.translate(params[:weird_article_data]) )
+
+You can use HashMapper in your own little hash-like objects:
+
+   class NiceHash
+     include Enumerable
+     extend HashMap
+     
+     map from('/names/first'), to('/first_name')
+     map from('/names/last'), to('/last_name')
+
+     def initialize(input_hash)
+       @hash = self.class.translate(input_hash)
+     end
+
+     def [](k)
+       @hash[k]
+     end
+
+     def []=(k,v)
+       @hash[k] = v
+     end
+
+     def each(&block)
+       @hash.each(&block)
+     end
+   end
+
+   @user = User.new(NiceHash.new(params))
+
+=== Options:
+
+==== Coercing values
+
+You want to make sure an incoming value get converted to a certain type, so 
+
+{'one' => '1', 'two' => '2'} get translated to {:one => 1, :two => 2}
+
+Do this:
+
+   map from('/one'), to('/one', :to_i)
+   map from('/two'), to('/two', :to_i)
+
+You can pass :to_i, :to_s or anything available method that makes sense.
+
+==== Array access
+
+You want:
+
+{:names => ['Ismael', 'Celis']} converted to {:first_name => 'Ismael', :last_name => 'Celis'}
+
+Do this:
+
+   map from('/names[0]'), to('/first_name')
+   map from('/names[1]'), to('/last_name')
 
 == REQUIREMENTS:
 
-* FIX (list of requirements)
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+# If you haven't done this already:
+gem sources -a http://gems.github.com
+
+# Now install
+sudo gem install ismasan-hash_mapper
 
 == LICENSE:
 
