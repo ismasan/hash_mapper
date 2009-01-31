@@ -2,12 +2,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{hash_mapper}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Ismael Celis"]
   s.date = %q{2009-01-31}
-  s.description = %q{Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json).  HashMapper is a tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.}
+  s.description = %q{Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json).  Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.}
   s.email = ["ismaelct@gmail.com"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "PostInstall.txt", "README.rdoc"]
   s.files = ["History.txt", "Manifest.txt", "PostInstall.txt", "README.rdoc", "Rakefile", "lib/hash_mapper.rb", "script/console", "script/destroy", "script/generate", "spec/hash_mapper_spec.rb", "spec/spec.opts", "spec/spec_helper.rb", "tasks/rspec.rake"]
