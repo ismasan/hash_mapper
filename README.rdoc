@@ -83,7 +83,7 @@ You can use HashMapper in your own little hash-like objects:
 
 You want to make sure an incoming value get converted to a certain type, so 
 
-{'one' => '1', 'two' => '2'} get translated to {:one => 1, :two => 2}
+{'one' => '1', 'two' => '2'} gets translated to {:one => 1, :two => 2}
 
 Do this:
 
@@ -91,6 +91,18 @@ Do this:
    map from('/two'), to('/two', :to_i)
 
 You can pass :to_i, :to_s or anything available method that makes sense.
+
+==== Custom value filtering
+
+You want to pass the final value of a key through a custom filter:
+
+{:names => {:first => 'Ismael', :last => 'Celis'}} gets translated to {:user => 'Mr. Celis, Ismael'}
+
+Do this:
+
+   map from('/names'), to('/user') do |names|
+     "Mr. #{names[1]}, #{names[0]}"
+   end
 
 ==== Array access
 
@@ -102,6 +114,58 @@ Do this:
 
    map from('/names[0]'), to('/first_name')
    map from('/names[1]'), to('/last_name')
+
+=== Advanced usage
+==== Nested mappers
+
+You want to map nested structures delegating to different mappers:
+
+From this:
+input = {
+	:project 		=> 'HashMapper',
+	:url			=> 'http://github.com/ismasan/hash_mapper',
+	:author_names	=> {:first => 'Ismael', :last => 'Celis'}
+}
+To this:
+output = {
+	:project_name	=> 'HashMapper',
+	:url			=> 'http://github.com/ismasan/hash_mapper',
+	:author			=> {:first_name => 'Ismael', :last_name => 'Celis'}
+}
+
+Define an UserMapper separate from your ProjectMapper, so you reuse them combined or standalone
+
+   class UserMapper
+     extend HashMapper
+     map from('/first'),	to('/first_name')
+     map from('/last'),		to('/lastt_name')
+   end
+
+   class ProjectMapper
+     extend HashMapper
+     map from('/project'), 		to('/project_name')
+     map from('/url'),			to('/url')
+     map from('/author_names'),	to('/author'), &UserMapper
+   end
+
+Now ProjectMapper will delegate parsing of :author_names to UserMapper
+
+   ProjectMapper.translate( input ) # => output
+
+* Note the ampersand in &UserMapper. This is important if you are passing custom classes instead of procs.
+* If you want to implement your own filter class just define to_proc in it.
+
+Let's say you have a CompanyMapper which maps a hash with an array of employees, and you want to reuse UserMapper to map each employee:
+
+   class CompanyMapper
+     map from('/info/name'), 			to('/company_name')
+     map form('/info/address'),			to('/company_address')
+     map from('/info/year_founded'),	to('year_founded', :to_i)
+
+     map from('/employees'),			to('employees') do |employees_array|
+       employees_array.collect {|emp_hash| UserMapper.translate(emp_hash)}
+     end
+   end
 
 == REQUIREMENTS:
 
