@@ -196,6 +196,13 @@ class CompanyMapper
   end
 end
 
+class CompanyEmployeesMapper
+  extend HashMapper
+  
+  map from('/name'),      to('/company_name')
+  map from('/employees'), to('/employees'), &PersonWithBlock
+end
+
 describe "with arrays of nested hashes" do
   before :each do
     @from = {
@@ -218,6 +225,11 @@ describe "with arrays of nested hashes" do
   
   it "should pass array value though given block mapper" do
     CompanyMapper.translate(@from).should == @to
+  end
+  
+  it "should map array elements automatically" do
+    pending "Define semantics for this"
+    CompanyEmployeesMapper.translate(@from).should == @to
   end
 end
 

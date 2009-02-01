@@ -66,7 +66,7 @@ module HashMapper
     end
     
     def resolve_value(another_path, incoming_hash)
-      coerce another_path.extract_from(incoming_hash)
+      coerce another_path.extract_value_from(incoming_hash)
     end
     
     def coerce(value)
@@ -75,7 +75,7 @@ module HashMapper
       value.send(@coerce_method) rescue value
     end
     
-    def extract_from(incoming_hash)
+    def extract_value_from(incoming_hash)
       value = inject(incoming_hash){|hh,ee| hh[ee]}
       return value unless @index
       value.to_a[@index]
