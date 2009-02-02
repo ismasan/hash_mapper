@@ -13,11 +13,15 @@ describe 'mapping a hash wit one level' do
   end
   
   it "should map to" do
-    OneLevel.translate(@from).should == @to
+    OneLevel.normalize(@from).should == @to
   end
   
   it "should have indifferent access" do
-    OneLevel.translate({'name' => 'ismael'}).should == @to
+    OneLevel.normalize({'name' => 'ismael'}).should == @to
+  end
+  
+  it "should map back the other way" do
+    OneLevel.denormalize(@to).should == @from
   end
   
 end
@@ -53,15 +57,19 @@ describe 'mapping from one nested hash to another' do
   end
   
   it "should map from and to different depths" do
-    ManyLevels.translate(@from).should == @to
+    ManyLevels.normalize(@from).should == @to
+  end
+  
+  it "should map back the other way" do
+    ManyLevels.denormalize(@to).should == @from
   end
   
 end
 
 class DifferentTypes
   extend HashMapper
-  map from('/strings/a'),      to('/integers/a',:to_i)
-  map from('/integers/b'),     to('/strings/b',:to_s)
+  map from('/strings/a',:to_s),      to('/integers/a',:to_i)
+  map from('/integers/b',:to_i),     to('/strings/b',:to_s)
 end
 
 describe 'coercing types' do
@@ -79,7 +87,11 @@ describe 'coercing types' do
   end
   
   it "should coerce values to specified types" do
-    DifferentTypes.translate(@from).should == @to
+    DifferentTypes.normalize(@from).should == @to
+  end
+  
+  it "should coerce the other way if specified" do
+    DifferentTypes.denormalize(@to).should == @from
   end
   
 end
@@ -107,7 +119,7 @@ describe 'arrays in hashes' do
   end
   
   it "should map array values as normal" do
-    ManyLevels.translate(@from).should == @to
+    ManyLevels.normalize(@from).should == @to
   end
 end
 
@@ -134,16 +146,18 @@ describe "array indexes" do
   end
   
   it "should extract defined array values" do
-    WithArrays.translate(@from).should == @to
+    WithArrays.normalize(@from).should == @to
   end
+  
 end
 
 class PersonWithBlock
   extend HashMapper
-  
-  map from('/names/first'), to('/first_name') do |name|
-    "+++ #{name} +++"
-  end
+  map from('/names/first'){|n| n.gsub('+','')}, to('/first_name'){|n| "+++#{n}+++"}
+end
+class PersonWithBlockOneWay
+  extend HashMapper
+  map from('/names/first'), to('/first_name') do |n| "+++#{n}+++" end
 end
 
 describe "with blocks filters" do
@@ -152,13 +166,22 @@ describe "with blocks filters" do
       :names => {:first => 'Ismael'}
     }
     @to = {
-      :first_name => '+++ Ismael +++'
+      :first_name => '+++Ismael+++'
     }
   end
   
   it "should pass final value through given block" do
-    PersonWithBlock.translate(@from).should == @to
+    PersonWithBlock.normalize(@from).should == @to
   end
+  
+  it "should be able to map the other way using a block" do
+    PersonWithBlock.denormalize(@to).should == @from
+  end
+  
+  it "should accept a block for just one direction" do
+    PersonWithBlockOneWay.normalize(@from).should == @to
+  end
+  
 end
 
 class ProjectMapper
@@ -178,12 +201,12 @@ describe "with nested mapper" do
     }
     @to = {
       :project_name => 'HashMapper',
-      :author => {:first_name => '+++ Ismael +++'}
+      :author => {:first_name => '+++Ismael+++'}
     }
   end
   
   it "should delegate nested hashes to another mapper" do
-    ProjectMapper.translate(@from).should == @to
+    ProjectMapper.normalize(@from).should == @to
   end
 end
 
@@ -192,7 +215,7 @@ class CompanyMapper
   
   map from('/name'),      to('/company_name')
   map from('/employees'), to('/employees') do |employees_array|
-    employees_array.collect{|emp_hash| PersonWithBlock.translate(emp_hash)}
+    employees_array.collect{|emp_hash| PersonWithBlock.normalize(emp_hash)}
   end
 end
 
@@ -216,20 +239,20 @@ describe "with arrays of nested hashes" do
     @to = {
       :company_name => 'New Bamboo',
       :employees => [
-        {:first_name => '+++ Ismael +++'},
-        {:first_name => '+++ Sachiyo +++'},
-        {:first_name => '+++ Pedro +++'}
+        {:first_name => '+++Ismael+++'},
+        {:first_name => '+++Sachiyo+++'},
+        {:first_name => '+++Pedro+++'}
       ]
     }
   end
   
   it "should pass array value though given block mapper" do
-    CompanyMapper.translate(@from).should == @to
+    CompanyMapper.normalize(@from).should == @to
   end
   
   it "should map array elements automatically" do
     pending "Define semantics for this"
-    CompanyEmployeesMapper.translate(@from).should == @to
+    CompanyEmployeesMapper.normalize(@from).should == @to
   end
 end
 

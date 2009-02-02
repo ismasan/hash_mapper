@@ -9,19 +9,21 @@ module HashMapper
   end
   
   def map(from, to, &blk)
-    to.filter = blk if block_given?
     self.maps << [from, to]
+    to.filter = blk if block_given? # Useful if just one block given
   end
   
-  def from(path, coerce_method = nil)
-    PathMap.new(path, coerce_method)
+  def from(path, coerce_method = nil, &blk)
+    path_map = PathMap.new(path, coerce_method)
+    path_map.filter = blk if block_given? # Useful if two blocks given
+    path_map
   end
   
   alias :to :from
   
-  def translate(incoming_hash)
+  def normalize(incoming_hash)
     output = {}
-    incoming_hash = simbolize_keys(incoming_hash)
+    incoming_hash = symbolize_keys(incoming_hash)
     maps.each do |path_from, path_to|
         path_to.inject(output){|h,e|
           if h[e]
@@ -33,10 +35,24 @@ module HashMapper
     end
     output
   end
-  
+
+  def denormalize(norm_hash)
+    output = {}
+    maps.each do |path_from, path_to|
+        path_from.inject(output){|h,e|
+          if h[e]
+            h[e]
+          else
+            h[e] = (e == path_from.last ? path_from.resolve_value(path_to, norm_hash) : {})
+          end
+        }
+    end
+    output
+  end
+
   # from http://www.geekmade.co.uk/2008/09/ruby-tip-normalizing-hash-keys-as-symbols/
   #
-  def simbolize_keys(hash)
+  def symbolize_keys(hash)
     hash.inject({}) do |options, (key, value)|
       options[(key.to_sym rescue key) || key] = value
       options
@@ -46,7 +62,7 @@ module HashMapper
   # This allows us to pass mapper classes as block arguments
   #
   def to_proc
-    Proc.new{|*args| self.translate(*args)}
+    Proc.new{|*args| self.normalize(*args)}
   end
   
   class PathMap
