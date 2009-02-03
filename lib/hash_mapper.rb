@@ -11,7 +11,7 @@ unless Symbol.instance_methods.include?('to_proc')
 end
 
 module HashMapper
-  VERSION = '0.0.2'
+  VERSION = '0.0.3'
   
   def maps
     @maps ||= []

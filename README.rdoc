@@ -31,7 +31,7 @@ It is a module so it doesn't get in the way of your inheritance tree.
      }
    }
 
-   ManyLevels.translate(input)
+   ManyLevels.normalize(input)
 
    # outputs:
    	{
@@ -47,7 +47,7 @@ It is a module so it doesn't get in the way of your inheritance tree.
 
 HashMapper was primarily written as a way of mapping data structure in json requests to hashes with structures friendlier to our ActiveRecord models:
 
-   @article = Article.create( ArticleParams.translate(params[:weird_article_data]) )
+   @article = Article.create( ArticleParams.normalize(params[:weird_article_data]) )
 
 You can use HashMapper in your own little hash-like objects:
 
@@ -59,7 +59,7 @@ You can use HashMapper in your own little hash-like objects:
      map from('/names/last'), to('/last_name')
 
      def initialize(input_hash)
-       @hash = self.class.translate(input_hash)
+       @hash = self.class.normalize(input_hash)
      end
 
      def [](k)
@@ -87,10 +87,14 @@ You want to make sure an incoming value get converted to a certain type, so
 
 Do this:
 
-   map from('/one'), to('/one', :to_i)
-   map from('/two'), to('/two', :to_i)
+   map from('/one'), to('/one', &:to_i)
+   map from('/two'), to('/two', &:to_i)
 
-You can pass :to_i, :to_s or anything available method that makes sense.
+You can pass :to_i, :to_s or anything available method that makes sense. Don't forget the block notation (&).
+
+You guessed it. That means that you can actually pass custom blocks to each to() definition as well. The following is similar to the previous example:
+
+   map from('/one), to('/one'){|value| value.to_i}
 
 ==== Custom value filtering
 
@@ -104,6 +108,20 @@ Do this:
      "Mr. #{names[1]}, #{names[0]}"
    end
 
+=== Mapping in reverse
+
+Cool, you can map one hash into another, but what if I want the opposite operation?
+
+Just use the denormalize() method instead:
+
+	input = {:first => 'Mark', :last => 'Evans'}
+	
+	output = NameMapper.normalize(input) # => {:first_name => 'Mark', :last_name => 'Evans'}
+	
+	NameMapper.denormalize(output) # => input
+	
+This will work with your block filters and even nested mappers (see below).
+	
 === Advanced usage
 ==== Nested mappers
 
@@ -139,7 +157,7 @@ Define an UserMapper separate from your ProjectMapper, so you reuse them combine
 
 Now ProjectMapper will delegate parsing of :author_names to UserMapper
 
-   ProjectMapper.translate( input ) # => output
+   ProjectMapper.normalize( input ) # => output
 
 * Note the ampersand in &UserMapper. This is important if you are passing custom classes instead of procs.
 * If you want to implement your own filter class just define to_proc in it.
@@ -152,7 +170,7 @@ Let's say you have a CompanyMapper which maps a hash with an array of employees,
      map from('/info/year_founded'),	to('year_founded', :to_i)
 
      map from('/employees'),			to('employees') do |employees_array|
-       employees_array.collect {|emp_hash| UserMapper.translate(emp_hash)}
+       employees_array.collect {|emp_hash| UserMapper.normalize(emp_hash)}
      end
    end
 
