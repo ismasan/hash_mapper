@@ -123,33 +123,6 @@ describe 'arrays in hashes' do
   end
 end
 
-class WithArrays
-  extend HashMapper
-  map from('/arrays/names[0]'),      to('/first_name')
-  map from('/arrays/names[1]'),      to('/last_name')
-  map from('/arrays/company'),       to('/work/company')
-end
-
-describe "array indexes" do
-  before :each do
-    @from = {
-      :arrays => {
-        :names => ['ismael','celis'],
-        :company => 'New Bamboo'
-      }
-    }
-    @to ={
-      :first_name => 'ismael',
-      :last_name => 'celis',
-      :work       => {:company => 'New Bamboo'}
-    }
-  end
-  
-  it "should extract defined array values" do
-    WithArrays.normalize(@from).should == @to
-  end
-  
-end
 
 class PersonWithBlock
   extend HashMapper
@@ -188,7 +161,7 @@ class ProjectMapper
   extend HashMapper
   
   map from('/name'),        to('/project_name')
-  map from('/author_hash'), to('/author'), &PersonWithBlock
+  map from('/author_hash'), to('/author'), using(PersonWithBlock)
 end
 
 describe "with nested mapper" do
@@ -208,6 +181,11 @@ describe "with nested mapper" do
   it "should delegate nested hashes to another mapper" do
     ProjectMapper.normalize(@from).should == @to
   end
+  
+  it "should translate the other way using nested hashes" do
+    ProjectMapper.denormalize(@to).should == @from
+  end
+  
 end
 
 class CompanyMapper
@@ -223,7 +201,7 @@ class CompanyEmployeesMapper
   extend HashMapper
   
   map from('/name'),      to('/company_name')
-  map from('/employees'), to('/employees'), &PersonWithBlock
+  map from('/employees'), to('/employees'), using(PersonWithBlock)
 end
 
 describe "with arrays of nested hashes" do
