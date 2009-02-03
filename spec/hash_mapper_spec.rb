@@ -68,8 +68,8 @@ end
 
 class DifferentTypes
   extend HashMapper
-  map from('/strings/a',:to_s),      to('/integers/a',:to_i)
-  map from('/integers/b',:to_i),     to('/strings/b',:to_s)
+  map from('/strings/a',  &:to_s),      to('/integers/a', &:to_i)
+  map from('/integers/b', &:to_i),     to('/strings/b',   &:to_s)
 end
 
 describe 'coercing types' do

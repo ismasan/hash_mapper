@@ -1,6 +1,13 @@
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
+# This allows us to call blah(&:some_method) instead of blah{|i| i.some_method }
+class Symbol
+  def to_proc
+    Proc.new {|obj| obj.send(self) }
+  end
+end
+
 module HashMapper
   VERSION = '0.0.2'
   
@@ -8,14 +15,14 @@ module HashMapper
     @maps ||= []
   end
   
-  def map(from, to, &blk)
+  def map(from, to, &filter)
     self.maps << [from, to]
-    to.filter = blk if block_given? # Useful if just one block given
+    to.filter = filter if block_given? # Useful if just one block given
   end
   
-  def from(path, coerce_method = nil, &blk)
-    path_map = PathMap.new(path, coerce_method)
-    path_map.filter = blk if block_given? # Useful if two blocks given
+  def from(path, &filter)
+    path_map = PathMap.new(path)
+    path_map.filter = filter if block_given? # Useful if two blocks given
     path_map
   end
   
@@ -73,22 +80,19 @@ module HashMapper
     
     attr_writer :filter
     
-    def initialize(path, coerce_method = nil)
+    def initialize(path)
       @path = path.dup
-      @coerce_method = coerce_method
       @index = extract_array_index!(path)
       @segments = parse(path)
       @filter = lambda{|value| value}# default filter does nothing
     end
     
     def resolve_value(another_path, incoming_hash)
-      coerce another_path.extract_value_from(incoming_hash)
+      apply_filter( another_path.extract_value_from(incoming_hash) )
     end
     
-    def coerce(value)
-      value = @filter.call(value)
-      return value unless @coerce_method
-      value.send(@coerce_method) rescue value
+    def apply_filter(value)
+      @filter.call(value)
     end
     
     def extract_value_from(incoming_hash)
