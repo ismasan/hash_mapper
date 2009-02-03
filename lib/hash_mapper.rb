@@ -77,17 +77,19 @@ module HashMapper
       paths = [path_from, path_to]
       paths.reverse! unless meth == :normalize
       value = paths.first.inject(incoming_hash){|h,e| h[e]}
-      
-      if value.kind_of?(Array) && delegated_mapper
-        value = value.map {|h| delegated_mapper.send(meth, h)}
-      elsif delegated_mapper
-        value = delegated_mapper.send(meth, value)
-      end
-      
+      value = delegate_to_nested_mapper(value, meth) if delegated_mapper
       add_value_to_hash!(output, paths.last, value)
     end
     
     protected
+    
+    def delegate_to_nested_mapper(value, meth)
+      v = if value.kind_of?(Array)
+        value.map {|h| delegated_mapper.send(meth, h)}
+      else
+        delegated_mapper.send(meth, value)
+      end
+    end
     
     def add_value_to_hash!(hash, path, value)
       path.inject(hash) do |h,e|
@@ -104,11 +106,9 @@ module HashMapper
   # contains array of path segments
   #
   class PathMap
-    
     include Enumerable
     
     attr_reader :segments
-    
     attr_writer :filter
     
     def initialize(path)
