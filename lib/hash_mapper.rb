@@ -18,7 +18,7 @@ module HashMapper
   end
   
   def map(from, to, using=nil, &filter)
-    self.maps << [from, to, using]
+    self.maps << Map.new(from, to, using)
     to.filter = filter if block_given? # Useful if just one block given
   end
   
@@ -34,39 +34,25 @@ module HashMapper
     mapper_class
   end
   
-  def normalize(incoming_hash)
-    output = {}
-    incoming_hash = symbolize_keys(incoming_hash)
-    maps.each do |path_from, path_to, delegated_mapper|
-      mapping_method = delegated_mapper.method(:normalize) if delegated_mapper
-      value = path_from.extract_value_from(incoming_hash, mapping_method)
-      add_value_to_hash(output, path_to, value)
-    end
-    output
+  def normalize(a_hash)
+    perform_hash_mapping a_hash, :normalize
   end
 
-  def denormalize(norm_hash)
-    output = {}
-    maps.each do |path_from, path_to, delegated_mapper|
-      mapping_method = delegated_mapper.method(:denormalize) if delegated_mapper
-      value = path_to.extract_value_from(norm_hash, mapping_method)
-      add_value_to_hash(output, path_from, value)
-    end
-    output
+  def denormalize(a_hash)
+    perform_hash_mapping a_hash, :denormalize
   end
 
   protected
   
-  def add_value_to_hash(hash, path, value)
-    path.inject(hash) do |h,e|
-      if h[e]
-        h[e]
-      else
-        h[e] = (e == path.last ? path.apply_filter(value) : {})
-      end
+  def perform_hash_mapping(a_hash, meth)
+    output = {}
+    a_hash = symbolize_keys(a_hash)
+    maps.each do |m|
+      m.process_into(output, a_hash, meth)
     end
+    output
   end
-
+  
   # from http://www.geekmade.co.uk/2008/09/ruby-tip-normalizing-hash-keys-as-symbols/
   #
   def symbolize_keys(hash)
@@ -76,6 +62,47 @@ module HashMapper
     end
   end
   
+  # Contains PathMaps
+  # Makes them interact
+  #
+  class Map
+    
+    attr_reader :path_from, :path_to, :delegated_mapper
+    
+    def initialize(path_from, path_to, delegated_mapper = nil)
+      @path_from, @path_to, @delegated_mapper = path_from, path_to, delegated_mapper
+    end
+    
+    def process_into(output, incoming_hash, meth = :normalize)
+      paths = [path_from, path_to]
+      paths.reverse! unless meth == :normalize
+      value = paths.first.inject(incoming_hash){|h,e| h[e]}
+      
+      if value.kind_of?(Array) && delegated_mapper
+        value = value.map {|h| delegated_mapper.send(meth, h)}
+      elsif delegated_mapper
+        value = delegated_mapper.send(meth, value)
+      end
+      
+      add_value_to_hash!(output, paths.last, value)
+    end
+    
+    protected
+    
+    def add_value_to_hash!(hash, path, value)
+      path.inject(hash) do |h,e|
+        if h[e]
+          h[e]
+        else
+          h[e] = (e == path.last ? path.apply_filter(value) : {})
+        end
+      end
+    end
+    
+  end
+  
+  # contains array of path segments
+  #
   class PathMap
     
     include Enumerable
@@ -92,11 +119,6 @@ module HashMapper
     
     def apply_filter(value)
       @filter.call(value)
-    end
-    
-    def extract_value_from(hash, mapping_method=nil)
-      value = inject(hash){|hh,ee| hh[ee]}
-      mapping_method ? mapping_method.call(value) : value
     end
     
     def each(&blk)

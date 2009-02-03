@@ -126,6 +126,9 @@ end
 
 class PersonWithBlock
   extend HashMapper
+  def self.normalize(h)
+    super
+  end
   map from('/names/first'){|n| n.gsub('+','')}, to('/first_name'){|n| "+++#{n}+++"}
 end
 class PersonWithBlockOneWay
@@ -229,7 +232,6 @@ describe "with arrays of nested hashes" do
   end
   
   it "should map array elements automatically" do
-    pending "Define semantics for this"
     CompanyEmployeesMapper.normalize(@from).should == @to
   end
 end
