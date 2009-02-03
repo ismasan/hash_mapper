@@ -2,9 +2,11 @@ $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 # This allows us to call blah(&:some_method) instead of blah{|i| i.some_method }
-class Symbol
-  def to_proc
-    Proc.new {|obj| obj.send(self) }
+unless Symbol.instance_methods.include?('to_proc')
+  class Symbol
+    def to_proc
+      Proc.new {|obj| obj.send(self) }
+    end
   end
 end
 
