@@ -123,6 +123,38 @@ describe 'arrays in hashes' do
   end
 end
 
+class WithArrays
+  extend HashMapper
+  map from('/arrays/names[0]'),      to('/first_name')
+  map from('/arrays/names[1]'),      to('/last_name')
+  map from('/arrays/company'),       to('/work/company')
+end
+ 
+describe "array indexes" do
+  before :each do
+    @from = {
+      :arrays => {
+        :names => ['ismael','celis'],
+        :company => 'New Bamboo'
+      }
+    }
+    @to ={
+      :first_name => 'ismael',
+      :last_name => 'celis',
+      :work       => {:company => 'New Bamboo'}
+    }
+  end
+  
+  it "should extract defined array values" do
+    pending "must reimplement for normalize and denormalize"
+    WithArrays.normalize(@from).should == @to
+  end
+  
+  it "should map the other way restoring arrays" do
+    pending "must reimplement for normalize and denormalize"
+    WithArrays.denormalize(@from).should == @to
+  end
+end
 
 class PersonWithBlock
   extend HashMapper

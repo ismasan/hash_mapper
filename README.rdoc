@@ -104,17 +104,6 @@ Do this:
      "Mr. #{names[1]}, #{names[0]}"
    end
 
-==== Array access
-
-You want:
-
-{:names => ['Ismael', 'Celis']} converted to {:first_name => 'Ismael', :last_name => 'Celis'}
-
-Do this:
-
-   map from('/names[0]'), to('/first_name')
-   map from('/names[1]'), to('/last_name')
-
 === Advanced usage
 ==== Nested mappers
 
@@ -175,6 +164,19 @@ But HashMapper's nested mappers will actually do that for you if a value is an a
    
 == REQUIREMENTS:
 
+== TODO:
+=== Array access
+
+* See pending specs
+
+You want:
+
+{:names => ['Ismael', 'Celis']} converted to {:first_name => 'Ismael', :last_name => 'Celis'}
+
+Do this:
+
+   map from('/names[0]'), to('/first_name')
+   map from('/names[1]'), to('/last_name')
 
 == INSTALL:
 
