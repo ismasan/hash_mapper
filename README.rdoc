@@ -206,6 +206,11 @@ Do this:
 
    sudo gem install ismasan-hash_mapper
 
+== Credits:
+
+* Ismael Celis (http://www.estadobeta.com)
+* Mark Evans
+
 == LICENSE:
 
 (The MIT License)
