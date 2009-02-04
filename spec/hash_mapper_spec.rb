@@ -271,18 +271,22 @@ end
 class NoKeys
   extend HashMapper
   
-  map from('/exists'), to('/exists_yahoo')
-  map from('/foo'), to('/bar')
+  map from('/exists'), to('/exists_yahoo') #in
+  map from('/exists_as_nil'), to('/exists_nil') #in
+  map from('/foo'), to('/bar') # not in
+  
 end
 
 describe "with non-matching maps" do
   before :all do
     @input = {
       :exists => 1,
+      :exists_as_nil => nil,
       :doesnt_exist => 2
     }
     @output = {
-      :exists_yahoo => 1
+      :exists_yahoo => 1,
+      :exists_nil => nil
     }
   end
   
