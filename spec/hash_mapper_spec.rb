@@ -268,4 +268,26 @@ describe "with arrays of nested hashes" do
   end
 end
 
+class NoKeys
+  extend HashMapper
+  
+  map from('/exists'), to('/exists_yahoo')
+  map from('/foo'), to('/bar')
+end
+
+describe "with non-matching maps" do
+  before :all do
+    @input = {
+      :exists => 1,
+      :doesnt_exist => 2
+    }
+    @output = {
+      :exists_yahoo => 1
+    }
+  end
+  
+  it "should ignore maps that don't exist" do
+    NoKeys.normalize(@input).should == @output
+  end
+end
 

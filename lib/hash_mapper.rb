@@ -73,15 +73,25 @@ module HashMapper
       @path_from, @path_to, @delegated_mapper = path_from, path_to, delegated_mapper
     end
     
-    def process_into(output, incoming_hash, meth = :normalize)
-      paths = [path_from, path_to]
-      paths.reverse! unless meth == :normalize
-      value = paths.first.inject(incoming_hash){|h,e| h[e]}
-      value = delegate_to_nested_mapper(value, meth) if delegated_mapper
-      add_value_to_hash!(output, paths.last, value)
+    def process_into(output, input, meth = :normalize)
+      path_1, path_2 = (meth == :normalize ? [path_from, path_to] : [path_to, path_from])
+      catch :no_value do
+        value = get_value_from_input(output, input, path_1, meth)
+        add_value_to_hash!(output, path_2, value)
+      end
     end
     
     protected
+    
+    def get_value_from_input(output, input, path, meth)
+      value = path.inject(input) do |h,e|
+        throw :no_value unless h.has_key?(e)
+        h[e]
+      end
+      value = delegate_to_nested_mapper(value, meth) if delegated_mapper
+      value
+    end
+    
     
     def delegate_to_nested_mapper(value, meth)
       v = if value.kind_of?(Array)
