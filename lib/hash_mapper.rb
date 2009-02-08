@@ -105,7 +105,14 @@ module HashMapper
     def add_value_to_hash!(hash, path, value)
       path.inject(hash) do |h,e|
         if contained?(h,e)
-          e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i]
+          if e[1].nil? 
+            h[e[0].to_sym] 
+          else 
+            if e == path.last
+              h[e[0].to_sym][e[1].to_i] = value
+            end
+            h[e[0].to_sym][e[1].to_i]
+          end
         else
           if e[1].nil?
             h[e[0].to_sym] = (e == path.last ? path.apply_filter(value) : {})
@@ -118,7 +125,7 @@ module HashMapper
     end
     
     def contained?(h,e)
-      e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i]
+      e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i].nil?
     rescue
       false
     end
