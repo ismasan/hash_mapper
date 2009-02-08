@@ -205,8 +205,9 @@ But HashMapper's nested mappers will actually do that for you if a value is an a
 
 == Credits:
 
-* Ismael Celis (http://www.estadobeta.com)
-* Mark Evans
+* Ismael Celis (Author - http://www.estadobeta.com)
+* Mark Evans (Contributor - http://github.com/markevans)
+* Jdeveloper (Contributor - http://github.com/jdeveloper)
 
 == LICENSE:
 
