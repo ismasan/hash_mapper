@@ -152,7 +152,7 @@ describe "array indexes" do
   
   it "should map the other way restoring arrays" do
     #pending "must reimplement for normalize and denormalize"
-    WithArrays.denormalize(@from).should == @to
+    WithArrays.denormalize(@to).should == @from
   end
 end
 
