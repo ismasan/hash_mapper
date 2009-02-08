@@ -146,12 +146,12 @@ describe "array indexes" do
   end
   
   it "should extract defined array values" do
-    pending "must reimplement for normalize and denormalize"
+    #pending "must reimplement for normalize and denormalize"
     WithArrays.normalize(@from).should == @to
   end
   
   it "should map the other way restoring arrays" do
-    pending "must reimplement for normalize and denormalize"
+    #pending "must reimplement for normalize and denormalize"
     WithArrays.denormalize(@from).should == @to
   end
 end

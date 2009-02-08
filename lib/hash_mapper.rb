@@ -85,8 +85,9 @@ module HashMapper
     
     def get_value_from_input(output, input, path, meth)
       value = path.inject(input) do |h,e|
-        throw :no_value unless h.has_key?(e)
-        h[e]
+        throw :no_value unless h.has_key?(e[0].to_sym)
+        e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i]
+        #h[e[0].to_sym]
       end
       value = delegate_to_nested_mapper(value, meth) if delegated_mapper
       value
@@ -103,14 +104,24 @@ module HashMapper
     
     def add_value_to_hash!(hash, path, value)
       path.inject(hash) do |h,e|
-        if h[e]
-          h[e]
+        if contained?(h,e)
+          e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i]
         else
-          h[e] = (e == path.last ? path.apply_filter(value) : {})
+          if e[1].nil?
+            h[e[0].to_sym] = (e == path.last ? path.apply_filter(value) : {})
+          else
+            h[e[0].to_sym] = []
+            h[e[0].to_sym][e[1].to_i] = (e == path.last ? path.apply_filter(value) : {})
+          end
         end
       end
     end
     
+    def contained?(h,e)
+      e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i]
+    rescue
+      false
+    end
   end
   
   # contains array of path segments
@@ -142,7 +153,12 @@ module HashMapper
     private
     
     def parse(path)
-      path.sub(/^\//,'').split('/').map(&:to_sym)
+      #path.sub(/^\//,'').split('/').map(&:to_sym)
+      path.sub(/^\//,'').split('/').map{ |p| key_index p }
+    end
+    
+    def key_index(p)
+      p =~ /\[[0-9]+\]$/ ? p.sub(/\[([0-9]+)\]$/,' \1').split(' ') : [p,nil]
     end
     
   end
