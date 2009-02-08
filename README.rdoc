@@ -123,6 +123,15 @@ Just use the denormalize() method instead:
 This will work with your block filters and even nested mappers (see below).
 	
 === Advanced usage
+==== Array access
+You want:
+
+{:names => ['Ismael', 'Celis']} converted to {:first_name => 'Ismael', :last_name => 'Celis'}
+
+Do this:
+
+   map from('/names[0]'), to('/first_name')
+   map from('/names[1]'), to('/last_name')
 ==== Nested mappers
 
 You want to map nested structures delegating to different mappers:
@@ -183,18 +192,6 @@ But HashMapper's nested mappers will actually do that for you if a value is an a
 == REQUIREMENTS:
 
 == TODO:
-=== Array access
-
-* See pending specs
-
-You want:
-
-{:names => ['Ismael', 'Celis']} converted to {:first_name => 'Ismael', :last_name => 'Celis'}
-
-Do this:
-
-   map from('/names[0]'), to('/first_name')
-   map from('/names[1]'), to('/last_name')
 
 == INSTALL:
 
