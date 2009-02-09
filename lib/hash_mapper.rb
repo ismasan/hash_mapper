@@ -108,17 +108,13 @@ module HashMapper
           if e[1].nil? 
             h[e[0].to_sym] 
           else 
-            if e == path.last
-              h[e[0].to_sym][e[1].to_i] = value
-            end
-            h[e[0].to_sym][e[1].to_i]
+            add_array_value h, e, path, value
           end
         else
           if e[1].nil?
             h[e[0].to_sym] = (e == path.last ? path.apply_filter(value) : {})
           else
-            h[e[0].to_sym] = []
-            h[e[0].to_sym][e[1].to_i] = (e == path.last ? path.apply_filter(value) : {})
+            add_array_value h, e, path, (e == path.last ? path.apply_filter(value) : {})
           end
         end
       end
@@ -128,6 +124,14 @@ module HashMapper
       e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i].nil?
     rescue
       false
+    end
+    
+    def add_array_value(h,e,path,value)
+      h[e[0].to_sym] = [] unless h[e[0].to_sym]
+      if e == path.last
+        h[e[0].to_sym][e[1].to_i] = value
+      end
+      h[e[0].to_sym][e[1].to_i]
     end
   end
   
