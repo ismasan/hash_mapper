@@ -105,17 +105,12 @@ module HashMapper
     def add_value_to_hash!(hash, path, value)
       path.inject(hash) do |h,e|
         if contained?(h,e)
-          if e[1].nil? 
-            h[e[0].to_sym] 
-          else 
-            add_array_value h, e, path, value
-          end
+          e[1].nil? ? h[e[0].to_sym] : add_array_value(h, e, path, value)
         else
           if e[1].nil?
             h[e[0].to_sym] = (e == path.last ? path.apply_filter(value) : {})
           else
             add_array_value h, e, path, (e == path.last ? path.apply_filter(value) : {})
-          end
         end
       end
     end
