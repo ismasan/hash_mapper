@@ -111,6 +111,7 @@ module HashMapper
             h[e[0].to_sym] = (e == path.last ? path.apply_filter(value) : {})
           else
             add_array_value h, e, path, (e == path.last ? path.apply_filter(value) : {})
+          end
         end
       end
     end
