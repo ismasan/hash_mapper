@@ -84,10 +84,9 @@ module HashMapper
     protected
     
     def get_value_from_input(output, input, path, meth)
-      value = path.inject(input) do |h,e|
-        throw :no_value unless h.has_key?(e[0].to_sym)
-        e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i]
-        #h[e[0].to_sym]
+      value = path.inject(input) do |h,segment|
+        throw :no_value unless h.has_key?(segment.key)
+        segment.value_from(h)
       end
       value = delegate_to_nested_mapper(value, meth) if delegated_mapper
       value
@@ -103,31 +102,36 @@ module HashMapper
     end
     
     def add_value_to_hash!(hash, path, value)
-      path.inject(hash) do |h,e|
-        if contained?(h,e)
-          e[1].nil? ? h[e[0].to_sym] : add_array_value(h, e, path, value)
+      path.inject(hash) do |h,segment|
+        if contained?(h,segment)
+          segment.has_index? ? h[segment.key] : add_array_value(h, segment, path, value)
         else
-          if e[1].nil?
-            h[e[0].to_sym] = (e == path.last ? path.apply_filter(value) : {})
+          if !segment.has_index?
+            puts h.inspect
+            h[segment.key] = if segment == path.last
+              path.apply_filter(value)
+              else
+                {}
+              end
           else
-            add_array_value h, e, path, (e == path.last ? path.apply_filter(value) : {})
+            add_array_value h, segment, path, (segment == path.last ? path.apply_filter(value) : {})
           end
         end
       end
     end
     
-    def contained?(h,e)
-      e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i].nil?
+    def contained?(h,segment)
+      segment.value_from(h)
     rescue
       false
     end
     
-    def add_array_value(h,e,path,value)
-      h[e[0].to_sym] = [] unless h[e[0].to_sym]
-      if e == path.last
-        h[e[0].to_sym][e[1].to_i] = value
+    def add_array_value(h,segment,path,value)
+      h[segment.key] = [] unless h.has_key?(segment.key)
+      if segment == path.last
+        h[segment.key][segment.index] = value
       end
-      h[e[0].to_sym][e[1].to_i]
+      h[segment.key][segment.index]
     end
   end
   
@@ -161,11 +165,28 @@ module HashMapper
     
     def parse(path)
       #path.sub(/^\//,'').split('/').map(&:to_sym)
-      path.sub(/^\//,'').split('/').map{ |p| key_index p }
+      path.sub(/^\//,'').split('/').map{ |p| Segment.new(p) }
     end
     
-    def key_index(p)
-      p =~ /\[[0-9]+\]$/ ? p.sub(/\[([0-9]+)\]$/,' \1').split(' ') : [p,nil]
+  end
+  
+  class Segment
+    attr_reader :index
+    
+    def initialize(str)
+      @key, @index  = (str =~ /\[[0-9]+\]$/ ? str.sub(/\[([0-9]+)\]$/,' \1').split(' ') : [str,nil])
+    end
+    
+    def key
+      @key.to_sym
+    end
+    
+    def has_index?
+      @index != nil
+    end
+    
+    def value_from(hash)
+      has_index? ? hash[key][@index] : hash[key]
     end
     
   end

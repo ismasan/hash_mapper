@@ -275,7 +275,7 @@ class NoKeys
   
 end
 
-describe "with non-matching maps" do
+describe "with non-matching or nil maps" do
   before :all do
     @input = {
       :exists => 1,
@@ -283,12 +283,11 @@ describe "with non-matching maps" do
       :doesnt_exist => 2
     }
     @output = {
-      :exists_yahoo => 1,
-      :exists_nil => nil
+      :exists_yahoo => 1
     }
   end
   
-  it "should ignore maps that don't exist" do
+  it "should ignore maps that don't exist or have nil values" do
     NoKeys.normalize(@input).should == @output
   end
 end
