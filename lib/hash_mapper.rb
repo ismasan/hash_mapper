@@ -64,7 +64,7 @@ module HashMapper
     output = {}
     # Before filter
     before_filter = instance_eval "@before_#{meth}"
-    output = before_filter.call(a_hash, output) if before_filter
+    a_hash = before_filter.call(a_hash, output) if before_filter
     # Do the mapping
     a_hash = symbolize_keys(a_hash)
     maps.each do |m|

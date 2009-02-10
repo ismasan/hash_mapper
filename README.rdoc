@@ -201,8 +201,8 @@ They all yield a block with 2 arguments - the hash you are mapping from and the 
     map from('/raw'), to('/fried')
     
     before_normalize do |input, output|
-      output[:time] = Time.now     # the normalized hash will now be {:fried => 'blah', :time => <time object> }
-      output
+      input['raw'] ||= 'please'     # this will give 'raw' a default value 
+      input
     end
     
     after_denormalize do |input, output|
@@ -211,7 +211,7 @@ They all yield a block with 2 arguments - the hash you are mapping from and the 
 
   end
 
-Important: note that you need to return the output each time.
+Important: note that for before filters, you need to return the (modified) input, and for after filters, you need to return the output.
 Note also that 'output' is correct at the time of the filter, i.e. before_normalize yields 'output' as an empty hash, while after_normalize yields it as an already normalized hash.
 
    

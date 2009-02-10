@@ -296,14 +296,15 @@ end
 class WithBeforeFilters
   extend HashMapper
   map from('/hello'), to('/goodbye')
+  map from('/extra'), to('/extra')
 
   before_normalize do |input, output|
-    output[:this_is] = "extra #{input[:hello]} innit"
-    output
+    input[:extra] = "extra #{input[:hello]} innit"
+    input
   end
   before_denormalize do |input, output|
     input[:goodbye] = 'changed'
-    output
+    input
   end
 end
 
@@ -327,7 +328,7 @@ describe "before and after filters" do
     @norm   = {:goodbye => 'seeya later!'}
   end
   it "should allow filtering before normalize" do
-    WithBeforeFilters.normalize(@denorm).should == {:goodbye => 'wassup?!', :this_is => 'extra wassup?! innit'}
+    WithBeforeFilters.normalize(@denorm).should == {:goodbye => 'wassup?!', :extra => 'extra wassup?! innit'}
   end
   it "should allow filtering before denormalize" do
     WithBeforeFilters.denormalize(@norm).should == {:hello => 'changed'}
