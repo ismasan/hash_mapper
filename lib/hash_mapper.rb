@@ -109,9 +109,8 @@ module HashMapper
     
     def get_value_from_input(output, input, path, meth)
       value = path.inject(input) do |h,e|
-        throw :no_value unless h.has_key?(e[0].to_sym)
-        e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i]
-        #h[e[0].to_sym]
+        throw :no_value unless h[e]#.has_key?(e)
+        h[e]
       end
       value = delegate_to_nested_mapper(value, meth) if delegated_mapper
       value
@@ -128,31 +127,14 @@ module HashMapper
     
     def add_value_to_hash!(hash, path, value)
       path.inject(hash) do |h,e|
-        if contained?(h,e)
-          if e[1].nil? 
-            h[e[0].to_sym] 
-          else 
-            if e == path.last
-              h[e[0].to_sym][e[1].to_i] = value
-            end
-            h[e[0].to_sym][e[1].to_i]
-          end
+        if h[e]
+          h[e]
         else
-          if e[1].nil?
-            h[e[0].to_sym] = (e == path.last ? path.apply_filter(value) : {})
-          else
-            h[e[0].to_sym] = []
-            h[e[0].to_sym][e[1].to_i] = (e == path.last ? path.apply_filter(value) : {})
-          end
+          h[e] = (e == path.last ? path.apply_filter(value) : {})
         end
       end
     end
     
-    def contained?(h,e)
-      e[1].nil? ? h[e[0].to_sym] : h[e[0].to_sym][e[1].to_i].nil?
-    rescue
-      false
-    end
   end
   
   # contains array of path segments
@@ -184,12 +166,7 @@ module HashMapper
     private
     
     def parse(path)
-      #path.sub(/^\//,'').split('/').map(&:to_sym)
-      path.sub(/^\//,'').split('/').map{ |p| key_index p }
-    end
-    
-    def key_index(p)
-      p =~ /\[[0-9]+\]$/ ? p.sub(/\[([0-9]+)\]$/,' \1').split(' ') : [p,nil]
+      path.sub(/^\//,'').split('/').map(&:to_sym)
     end
     
   end
