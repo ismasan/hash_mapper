@@ -285,13 +285,22 @@ describe "with non-matching maps" do
       :doesnt_exist => 2
     }
     @output = {
-      :exists_yahoo => 1,
-      :exists_nil => nil
+      :exists_yahoo => 1
     }
   end
   
   it "should ignore maps that don't exist" do
     NoKeys.normalize(@input).should == @output
   end
+end
+
+describe "passing an empty hash" do
+  it "should return an empty hash" do
+    NoKeys.normalize({}).should == {}
+  end
+end
+
+describe "allowing nils" do
+  it "should assign nil values if :allow_nil => true"
 end
 
