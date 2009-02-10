@@ -188,6 +188,32 @@ But HashMapper's nested mappers will actually do that for you if a value is an a
 	map from('/employees'),	to('employees'), using(UserMapper)
 	
 ... Will map each employee using UserMapper.
+
+==== Before and after filters
+
+Sometimes you will need some slightly more complex processing on the whole hash, either before or after normalizing/denormalizing.
+
+For this you can use the class methods before_normalize, before_denormalize, after_normalize and after_denormalize.
+
+They all yield a block with 2 arguments - the hash you are mapping from and the hash you are mapping to, e.g.
+
+  class EggMapper
+    map from('/raw'), to('/fried')
+    
+    before_normalize do |input, output|
+      output[:time] = Time.now     # the normalized hash will now be {:fried => 'blah', :time => <time object> }
+      output
+    end
+    
+    after_denormalize do |input, output|
+      output.to_a        # the denormalized object will now be an array, not a hash!!
+    end
+
+  end
+
+Important: note that you need to return the output each time.
+Note also that 'output' is correct at the time of the filter, i.e. before_normalize yields 'output' as an empty hash, while after_normalize yields it as an already normalized hash.
+
    
 == REQUIREMENTS:
 

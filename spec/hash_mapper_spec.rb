@@ -293,3 +293,50 @@ describe "with non-matching maps" do
   end
 end
 
+class WithBeforeFilters
+  extend HashMapper
+  map from('/hello'), to('/goodbye')
+
+  before_normalize do |input, output|
+    output[:this_is] = "extra #{input[:hello]} innit"
+    output
+  end
+  before_denormalize do |input, output|
+    input[:goodbye] = 'changed'
+    output
+  end
+end
+
+class WithAfterFilters
+  extend HashMapper
+  map from('/hello'), to('/goodbye')
+
+  after_normalize do |input, output|
+    output = output.to_a
+    output
+  end
+  after_denormalize do |input, output|
+    output.delete(:hello)
+    output
+  end
+end
+
+describe "before and after filters" do
+  before(:all) do
+    @denorm = {:hello   => 'wassup?!'}
+    @norm   = {:goodbye => 'seeya later!'}
+  end
+  it "should allow filtering before normalize" do
+    WithBeforeFilters.normalize(@denorm).should == {:goodbye => 'wassup?!', :this_is => 'extra wassup?! innit'}
+  end
+  it "should allow filtering before denormalize" do
+    WithBeforeFilters.denormalize(@norm).should == {:hello => 'changed'}
+  end
+  it "should allow filtering after normalize" do
+    WithAfterFilters.normalize(@denorm).should == [[:goodbye, 'wassup?!']]
+  end
+  it "should allow filtering after denormalize" do
+    WithAfterFilters.denormalize(@norm).should == {}
+  end
+
+end

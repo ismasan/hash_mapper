@@ -41,15 +41,39 @@ module HashMapper
   def denormalize(a_hash)
     perform_hash_mapping a_hash, :denormalize
   end
+  
+  def before_normalize(&blk)
+    @before_normalize = blk
+  end
+
+  def before_denormalize(&blk)
+    @before_denormalize = blk
+  end
+
+  def after_normalize(&blk)
+    @after_normalize = blk
+  end
+
+  def after_denormalize(&blk)
+    @after_denormalize = blk
+  end
 
   protected
   
   def perform_hash_mapping(a_hash, meth)
     output = {}
+    # Before filter
+    before_filter = instance_eval "@before_#{meth}"
+    output = before_filter.call(a_hash, output) if before_filter
+    # Do the mapping
     a_hash = symbolize_keys(a_hash)
     maps.each do |m|
       m.process_into(output, a_hash, meth)
     end
+    # After filter
+    after_filter = instance_eval "@after_#{meth}"
+    output = after_filter.call(a_hash, output) if after_filter
+    # Return
     output
   end
   
