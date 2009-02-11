@@ -159,6 +159,10 @@ module HashMapper
       @segments.each(&blk)
     end
     
+    def first
+      @segments.first
+    end
+    
     def last
       @segments.last
     end
