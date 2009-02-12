@@ -57,8 +57,16 @@ module HashMapper
   def after_denormalize(&blk)
     @after_denormalize = blk
   end
-
+  
+  def inherited(subclass)
+    subclass.maps = self.maps
+  end
+  
   protected
+  
+  def maps=(m)
+    @maps = m
+  end
   
   def perform_hash_mapping(a_hash, meth)
     output = {}
@@ -165,6 +173,10 @@ module HashMapper
     
     def last
       @segments.last
+    end
+    
+    def size
+      @segments.size
     end
     
     private

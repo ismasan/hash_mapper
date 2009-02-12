@@ -342,3 +342,39 @@ describe "before and after filters" do
   end
 
 end
+
+class C
+  extend HashMapper
+  map from('/c'), to('/c/c2')
+end
+
+class A
+  extend HashMapper
+  map from('/a'), to('/a/a2')
+end
+
+class B < A
+  map from('/b'), to('/b/b2')
+end
+
+describe "inherited mappers" do
+  before :all do
+    @from = {
+      :a => 'a',
+      :b => 'b'
+    }
+    @to ={
+      :a => {:a2 => 'a'},
+      :b => {:b2 => 'b'}
+    }
+
+  end
+  
+  it "should inherit mappings" do
+    B.normalize(@from).should == @to
+  end
+  
+  it "should not affect other mappers" do
+    C.normalize('c' => 'cc').should == {:c => {:c2 => 'cc'}}
+  end
+end
