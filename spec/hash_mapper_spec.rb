@@ -345,20 +345,20 @@ end
 
 class NotRelated
   extend HashMapper
-  map from('/n'), to('/n/n2')
+  map from('/n'), to('/n/n')
 end
 
 class A
   extend HashMapper
-  map from('/a'), to('/a/a2')
+  map from('/a'), to('/a/a')
 end
 
 class B < A
-  map from('/b'), to('/b/b2')
+  map from('/b'), to('/b/b')
 end
 
 class C < B
-  map from('/c'), to('/c/c2')
+  map from('/c'), to('/c/c')
 end
 
 describe "inherited mappers" do
@@ -369,8 +369,8 @@ describe "inherited mappers" do
       :c => 'c'
     }
     @to_b ={
-      :a => {:a2 => 'a'},
-      :b => {:b2 => 'b'}
+      :a => {:a => 'a'},
+      :b => {:b => 'b'}
     }
 
   end
@@ -380,6 +380,6 @@ describe "inherited mappers" do
   end
   
   it "should not affect other mappers" do
-    NotRelated.normalize('n' => 'nn').should == {:n => {:n2 => 'nn'}}
+    NotRelated.normalize('n' => 'nn').should == {:n => {:n => 'nn'}}
   end
 end

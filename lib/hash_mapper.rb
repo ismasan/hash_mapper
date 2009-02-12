@@ -1,13 +1,30 @@
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
-require 'active_support'
+begin
+  require 'active_support'
+rescue LoadError
+  require 'rubygems'
+  require 'active_support'
+end
+
+
 
 # This allows us to call blah(&:some_method) instead of blah{|i| i.some_method }
 unless Symbol.instance_methods.include?('to_proc')
   class Symbol
     def to_proc
       Proc.new {|obj| obj.send(self) }
+    end
+  end
+end
+
+# http://rpheath.com/posts/341-ruby-inject-with-index
+unless Array.instance_methods.include?("inject_with_index")
+  module Enumerable
+    def inject_with_index(injected)
+      each_with_index{ |obj, index| injected = yield(injected, obj, index) }
+      injected
     end
   end
 end
@@ -134,13 +151,14 @@ module HashMapper
     end
     
     def add_value_to_hash!(hash, path, value)
-      path.inject(hash) do |h,e|
+      path.inject_with_index(hash) do |h,e,i|
         if h[e]
           h[e]
         else
-          h[e] = (e == path.last ? path.apply_filter(value) : {})
+          h[e] = (i == path.size-1 ? path.apply_filter(value) : {})
         end
       end
+      
     end
     
   end
