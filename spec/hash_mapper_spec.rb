@@ -342,3 +342,44 @@ describe "before and after filters" do
   end
 
 end
+
+class NotRelated
+  extend HashMapper
+  map from('/n'), to('/n/n')
+end
+
+class A
+  extend HashMapper
+  map from('/a'), to('/a/a')
+end
+
+class B < A
+  map from('/b'), to('/b/b')
+end
+
+class C < B
+  map from('/c'), to('/c/c')
+end
+
+describe "inherited mappers" do
+  before :all do
+    @from = {
+      :a => 'a',
+      :b => 'b',
+      :c => 'c'
+    }
+    @to_b ={
+      :a => {:a => 'a'},
+      :b => {:b => 'b'}
+    }
+
+  end
+  
+  it "should inherit mappings" do
+    B.normalize(@from).should == @to_b
+  end
+  
+  it "should not affect other mappers" do
+    NotRelated.normalize('n' => 'nn').should == {:n => {:n => 'nn'}}
+  end
+end
