@@ -1,6 +1,8 @@
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
+require 'active_support'
+
 # This allows us to call blah(&:some_method) instead of blah{|i| i.some_method }
 unless Symbol.instance_methods.include?('to_proc')
   class Symbol
@@ -13,8 +15,13 @@ end
 module HashMapper
   VERSION = '0.0.5'
   
-  def maps
-    @maps ||= []
+  # we need this for inheritable mappers, which is annoying because it needs ActiveSupport, kinda overkill.
+  #
+  def self.extended(base)
+    base.class_eval do
+      write_inheritable_attribute :maps, []
+      class_inheritable_accessor :maps
+    end
   end
   
   def map(from, to, using=nil, &filter)
@@ -58,15 +65,8 @@ module HashMapper
     @after_denormalize = blk
   end
   
-  def inherited(subclass)
-    subclass.maps = self.maps
-  end
-  
   protected
-  
-  def maps=(m)
-    @maps = m
-  end
+
   
   def perform_hash_mapping(a_hash, meth)
     output = {}
