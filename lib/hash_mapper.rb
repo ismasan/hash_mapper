@@ -58,15 +58,7 @@ module HashMapper
     @after_denormalize = blk
   end
   
-  def inherited(subclass)
-    subclass.maps = self.maps
-  end
-  
   protected
-  
-  def maps=(m)
-    @maps = m
-  end
   
   def perform_hash_mapping(a_hash, meth)
     output = {}
