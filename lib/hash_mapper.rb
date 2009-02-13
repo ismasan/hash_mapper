@@ -134,17 +134,19 @@ module HashMapper
     
     def get_value_from_input(output, input, path, meth)
       value = path.inject(input) do |h,e|
-        throw :no_value unless h[e]#.has_key?(e)
+        throw :no_value if h[e].nil?#.has_key?(e)
         h[e]
       end
-      value = delegate_to_nested_mapper(value, meth) if delegated_mapper
-      value
+      delegated_mapper ? delegate_to_nested_mapper(value, meth) : value
     end
     
     
     def delegate_to_nested_mapper(value, meth)
-      v = if value.kind_of?(Array)
+      case value
+      when Array
         value.map {|h| delegated_mapper.send(meth, h)}
+      when nil
+        throw :no_value
       else
         delegated_mapper.send(meth, value)
       end
