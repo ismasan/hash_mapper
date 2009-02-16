@@ -30,7 +30,7 @@ unless Array.instance_methods.include?("inject_with_index")
 end
 
 module HashMapper
-  VERSION = '0.0.5'
+  VERSION = '0.0.6'
   
   # we need this for inheritable mappers, which is annoying because it needs ActiveSupport, kinda overkill.
   #
