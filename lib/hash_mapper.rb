@@ -91,7 +91,6 @@ module HashMapper
     before_filter = instance_eval "@before_#{meth}"
     a_hash = before_filter.call(a_hash, output) if before_filter
     # Do the mapping
-    a_hash = symbolize_keys(a_hash)
     maps.each do |m|
       m.process_into(output, a_hash, meth)
     end
@@ -100,15 +99,6 @@ module HashMapper
     output = after_filter.call(a_hash, output) if after_filter
     # Return
     output
-  end
-  
-  # from http://www.geekmade.co.uk/2008/09/ruby-tip-normalizing-hash-keys-as-symbols/
-  #
-  def symbolize_keys(hash)
-    hash.inject({}) do |options, (key, value)|
-      options[(key.to_sym rescue key) || key] = value
-      options
-    end
   end
   
   # Contains PathMaps
@@ -134,8 +124,9 @@ module HashMapper
     
     def get_value_from_input(output, input, path, meth)
       value = path.inject(input) do |h,e|
-        throw :no_value if h[e].nil?#.has_key?(e)
-        h[e]
+        v = h.with_indifferent_access[e] # this does it, but uses ActiveSupport
+        throw :no_value if v.nil?#.has_key?(e)
+        v
       end
       delegated_mapper ? delegate_to_nested_mapper(value, meth) : value
     end
@@ -154,7 +145,7 @@ module HashMapper
     
     def add_value_to_hash!(hash, path, value)
       path.inject_with_index(hash) do |h,e,i|
-        if h[e]
+        if !h[e].nil? # it can be FALSE
           h[e]
         else
           h[e] = (i == path.size-1 ? path.apply_filter(value) : {})

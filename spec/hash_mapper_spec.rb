@@ -294,6 +294,24 @@ describe "with non-matching maps" do
   end
 end
 
+describe "with false values" do
+  
+  it "should include values in output" do
+    NoKeys.normalize({'exists' => false}).should == {:exists_yahoo => false}
+    NoKeys.normalize({:exists => false}).should == {:exists_yahoo => false}
+  end
+  
+end
+
+describe "with nil values" do
+  
+  it "should not include values in output" do
+    NoKeys.normalize({:exists => nil}).should == {}
+    NoKeys.normalize({'exists' => nil}).should == {}
+  end
+  
+end
+
 class WithBeforeFilters
   extend HashMapper
   map from('/hello'), to('/goodbye')
@@ -383,3 +401,30 @@ describe "inherited mappers" do
     NotRelated.normalize('n' => 'nn').should == {:n => {:n => 'nn'}}
   end
 end
+
+class MixedMappings
+  extend HashMapper
+  map from('/big/jobs'), to('dodo')
+  map from('/timble'),   to('bingo/biscuit')
+end
+
+describe "dealing with strings and symbols" do
+  
+  it "should be able to normalize from a nested hash with string keys" do
+    MixedMappings.normalize(
+      'big' => {'jobs' => 5},
+      'timble' => 3.2
+    ).should ==   {:dodo  => 5,
+                   :bingo => {:biscuit => 3.2}}
+  end
+  
+  it "should not symbolized keys in value hashes" do
+    MixedMappings.normalize(
+      'big' => {'jobs' => 5},
+      'timble' => {'string key' => 'value'}
+    ).should ==   {:dodo  => 5,
+                   :bingo => {:biscuit => {'string key' => 'value'}}}
+  end
+  
+end
+
