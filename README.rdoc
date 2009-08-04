@@ -238,6 +238,7 @@ Do this:
 * Ismael Celis (Author - http://www.estadobeta.com)
 * Mark Evans (Contributor - http://github.com/markevans)
 * Jdeveloper (Contributor - http://github.com/jdeveloper)
+* nightscape (Contributor - http://github.com/nightscape)
 
 == LICENSE:
 
