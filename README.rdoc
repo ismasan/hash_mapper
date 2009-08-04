@@ -219,6 +219,10 @@ Do this:
    map from('/names[0]'), to('/first_name')
    map from('/names[1]'), to('/last_name')
 
+==== Optimizations
+
+* Get rid of ActiveSupport (used for inherited class variables and HashWithIndifferentAccess)
+
 == INSTALL:
 
 # If you haven't done this already:
