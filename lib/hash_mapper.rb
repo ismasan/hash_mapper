@@ -1,11 +1,21 @@
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
+def require_active_support
+  require 'active_support/core_ext/array/extract_options'
+  require 'active_support/core_ext/hash/indifferent_access'
+  require 'active_support/core_ext/duplicable'
+  Array.send(:include, ActiveSupport::CoreExtensions::Array::ExtractOptions)
+  Hash.send(:include, ActiveSupport::CoreExtensions::Hash::IndifferentAccess)
+  require 'active_support/core_ext/class/inheritable_attributes'
+
+end
+
 begin
-  require 'active_support'
+  require_active_support
 rescue LoadError
   require 'rubygems'
-  require 'active_support'
+  require_active_support
 end
 
 
@@ -30,7 +40,7 @@ unless Array.instance_methods.include?("inject_with_index")
 end
 
 module HashMapper
-  VERSION = '0.0.7'
+  VERSION = '0.0.8'
   
   # we need this for inheritable mappers, which is annoying because it needs ActiveSupport, kinda overkill.
   #
