@@ -45,7 +45,7 @@ It is a module so it doesn't get in the way of your inheritance tree.
 
 === Uses:
 
-HashMapper was primarily written as a way of mapping data structure in json requests to hashes with structures friendlier to our ActiveRecord models:
+HashMapper was primarily written as a way of mapping an arbitrary data structure in json requests to hashes with structures friendlier to our ActiveRecord models:
 
    @article = Article.create( ArticleParams.normalize(params[:weird_article_data]) )
 
@@ -53,7 +53,7 @@ You can use HashMapper in your own little hash-like objects:
 
    class NiceHash
      include Enumerable
-     extend HashMap
+     extend HashMapper
      
      map from('/names/first'), to('/first_name')
      map from('/names/last'), to('/last_name')
@@ -81,7 +81,7 @@ You can use HashMapper in your own little hash-like objects:
 
 ==== Coercing values
 
-You want to make sure an incoming value get converted to a certain type, so 
+You want to make sure an incoming value gets converted to a certain type, so 
 
 {'one' => '1', 'two' => '2'} gets translated to {:one => 1, :two => 2}
 
@@ -105,7 +105,7 @@ You want to pass the final value of a key through a custom filter:
 Do this:
 
    map from('/names'), to('/user') do |names|
-     "Mr. #{names[1]}, #{names[0]}"
+     "Mr. #{names[:first]}, #{names[:last]}"
    end
 
 === Mapping in reverse
@@ -159,15 +159,12 @@ Now ProjectMapper will delegate parsing of :author_names to UserMapper
 
    ProjectMapper.normalize( input ) # => output
 
-* Note the ampersand in &UserMapper. This is important if you are passing custom classes instead of procs.
-* If you want to implement your own filter class just define to_proc in it.
-
 Let's say you have a CompanyMapper which maps a hash with an array of employees, and you want to reuse UserMapper to map each employee. You could:
 
    class CompanyMapper
      map from('/info/name'), 			to('/company_name')
      map form('/info/address'),			to('/company_address')
-     map from('/info/year_founded'),	to('year_founded', :to_i)
+     map from('/info/year_founded'),	        to('year_founded', :to_i)
 
      map from('/employees'),			to('employees') do |employees_array|
        employees_array.collect {|emp_hash| UserMapper.normalize(emp_hash)}
