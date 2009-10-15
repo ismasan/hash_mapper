@@ -19,6 +19,7 @@ $hoe = Hoe.new('hash_mapper', HashMapper::VERSION) do |p|
   path = (p.rubyforge_name == p.name) ? p.rubyforge_name : "\#{p.rubyforge_name}/\#{p.name}"
   p.remote_rdoc_dir = File.join(path.gsub(/^#{p.rubyforge_name}\/?/,''), 'rdoc')
   p.rsync_args = '-av --delete --ignore-errors'
+  p.summary = "Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL."
 end
 
 require 'newgem/tasks' # load /tasks/*.rake
