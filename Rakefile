@@ -1,29 +1,22 @@
-%w[rubygems rake rake/clean fileutils newgem rubigen hoe].each { |f| require f }
+require 'rubygems'
 require File.dirname(__FILE__) + '/lib/hash_mapper'
 
-# Generate all the Rake tasks
-# Run 'rake -T' to see list of generated tasks (from gem root directory)
-$hoe = Hoe.new('hash_mapper', HashMapper::VERSION) do |p|
-  p.developer('Ismael Celis', 'ismaelct@gmail.com')
-  p.changes              = p.paragraphs_of("History.txt", 0..1).join("\n\n")
-  p.post_install_message = 'PostInstall.txt' # TODO remove if post-install message not required
-  p.rubyforge_name       = p.name # TODO this is default value
-  # p.extra_deps         = [
-  #   ['activesupport','>= 2.0.2'],
-  # ]
-  p.extra_dev_deps = [
-    ['newgem', ">= #{::Newgem::VERSION}"]
-  ]
-  
-  p.clean_globs |= %w[**/.DS_Store tmp *.log]
-  path = (p.rubyforge_name == p.name) ? p.rubyforge_name : "\#{p.rubyforge_name}/\#{p.name}"
-  p.remote_rdoc_dir = File.join(path.gsub(/^#{p.rubyforge_name}\/?/,''), 'rdoc')
-  p.rsync_args = '-av --delete --ignore-errors'
-  p.summary = "Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL."
-end
-
-require 'newgem/tasks' # load /tasks/*.rake
 Dir['tasks/**/*.rake'].each { |t| load t }
 
 # TODO - want other tests/tasks run by default? Add them to the list
 task :default => [:spec]
+
+
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "HashMapper"
+    gemspec.summary = "Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json)"
+    gemspec.description = "Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL."
+    gemspec.email = "ismaelct@gmail.com"
+    gemspec.homepage = "http://github.com/ismasan/hash_mapper"
+    gemspec.authors = ["Ismael Celis"]
+  end
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install technicalpickles-jeweler -s http://gems.github.com"
+end
