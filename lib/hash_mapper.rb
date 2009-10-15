@@ -129,12 +129,15 @@ module HashMapper
         add_value_to_hash!(output, path_2, value)
       end
     end
-
     protected
 
     def get_value_from_input(output, input, path, meth)
       value = path.inject(input) do |h,e|
-        v = h.with_indifferent_access[e] # this does it, but uses ActiveSupport
+        if h.respond_to?(:with_indifferent_access)# this does it, but uses ActiveSupport
+          v = h.with_indifferent_access[e]
+        else
+          v = h[e]
+        end
         throw :no_value if v.nil?#.has_key?(e)
         v
       end
@@ -158,7 +161,15 @@ module HashMapper
         if !h[e].nil? # it can be FALSE
           h[e]
         else
-          h[e] = (i == path.size-1 ? path.apply_filter(value) : {})
+          h[e] = if i == path.size-1
+            path.apply_filter(value)
+          else
+            if path.segments[i+1].is_a? Integer
+              []
+            else
+              {}
+            end
+          end
         end
       end
 
@@ -173,6 +184,7 @@ module HashMapper
 
     attr_reader :segments
     attr_writer :filter
+    attr_reader :path
 
     def initialize(path)
       @path = path.dup
@@ -201,9 +213,21 @@ module HashMapper
     end
 
     private
+    KEY_NAME_REGEXP = /([^\[]*)(\[(\d+)+\])?/
 
     def parse(path)
-      path.sub(/^\//,'').split('/').map(&:to_sym)
+
+      segments = path.sub(/^\//,'').split('/')
+      segments = segments.collect do |segment|
+        matches = segment.to_s.scan(KEY_NAME_REGEXP).flatten.compact
+        index = matches[2]
+        if index
+          [matches[0].to_sym, index.to_i]
+        else
+          segment.to_sym
+        end
+      end.flatten
+      segments
     end
 
   end
