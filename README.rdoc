@@ -228,11 +228,11 @@ Note also that 'output' is correct at the time of the filter, i.e. before_normal
 
 # If you haven't done this already:
 
-   gem sources -a http://gems.github.com
+    gem sources -a http://gemcutter.org
 
 # Now install
 
-   sudo gem install ismasan-hash_mapper
+   sudo gem install hash_mapper
 
 == Credits:
 
