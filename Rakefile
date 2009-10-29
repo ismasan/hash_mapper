@@ -10,7 +10,7 @@ task :default => [:spec]
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "HashMapper"
+    gemspec.name = "hash_mapper"
     gemspec.summary = "Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json)"
     gemspec.description = "Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL."
     gemspec.email = "ismaelct@gmail.com"
