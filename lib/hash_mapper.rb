@@ -4,11 +4,8 @@ $:.unshift(File.dirname(__FILE__)) unless
 def require_active_support
   require 'active_support/core_ext/array/extract_options'
   require 'active_support/core_ext/hash/indifferent_access'
-  require 'active_support/core_ext/duplicable'
-  Array.send(:include, ActiveSupport::CoreExtensions::Array::ExtractOptions)
-  Hash.send(:include, ActiveSupport::CoreExtensions::Hash::IndifferentAccess)
+  require 'active_support/core_ext/object/duplicable'
   require 'active_support/core_ext/class/inheritable_attributes'
-
 end
 
 begin
