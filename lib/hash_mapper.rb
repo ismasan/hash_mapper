@@ -132,8 +132,8 @@ module HashMapper
 
     def get_value_from_input(output, input, path, meth)
       value = path.inject(input) do |h,e|
-        if h.respond_to?(:with_indifferent_access)# this does it, but uses ActiveSupport
-          v = h.with_indifferent_access[e]
+        if h.is_a?(Hash)
+          v = [h[e.to_sym], h[e.to_s]].compact.first
         else
           v = h[e]
         end
