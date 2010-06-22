@@ -4,11 +4,8 @@ $:.unshift(File.dirname(__FILE__)) unless
 def require_active_support
   require 'active_support/core_ext/array/extract_options'
   require 'active_support/core_ext/hash/indifferent_access'
-  require 'active_support/core_ext/duplicable'
-  Array.send(:include, ActiveSupport::CoreExtensions::Array::ExtractOptions)
-  Hash.send(:include, ActiveSupport::CoreExtensions::Hash::IndifferentAccess)
+  require 'active_support/core_ext/object/duplicable'
   require 'active_support/core_ext/class/inheritable_attributes'
-
 end
 
 begin
@@ -132,8 +129,8 @@ module HashMapper
 
     def get_value_from_input(output, input, path, meth)
       value = path.inject(input) do |h,e|
-        if h.respond_to?(:with_indifferent_access)# this does it, but uses ActiveSupport
-          v = h.with_indifferent_access[e]
+        if h.is_a?(Hash)
+          v = [h[e.to_sym], h[e.to_s]].compact.first
         else
           v = h[e]
         end
