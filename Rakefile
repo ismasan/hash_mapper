@@ -15,6 +15,7 @@ begin
     gemspec.description = "Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL."
     gemspec.email = "ismaelct@gmail.com"
     gemspec.homepage = "http://github.com/ismasan/hash_mapper"
+    gemspec.add_dependency('active_support', '>= 3.0.0.beta')
     gemspec.authors = ["Ismael Celis"]
   end
 rescue LoadError
