@@ -81,7 +81,7 @@ You can use HashMapper in your own little hash-like objects:
 
 ==== Coercing values
 
-You want to make sure an incoming value get converted to a certain type, so 
+You want to make sure an incoming value gets converted to a certain type, so 
 
 {'one' => '1', 'two' => '2'} gets translated to {:one => 1, :two => 2}
 
@@ -168,9 +168,6 @@ Now ProjectMapper will delegate parsing of :author_names to UserMapper
 
    ProjectMapper.normalize( input ) # => output
 
-* Note the ampersand in &UserMapper. This is important if you are passing custom classes instead of procs.
-* If you want to implement your own filter class just define to_proc in it.
-
 Let's say you have a CompanyMapper which maps a hash with an array of employees, and you want to reuse UserMapper to map each employee. You could:
 
    class CompanyMapper
@@ -226,13 +223,9 @@ Note also that 'output' is correct at the time of the filter, i.e. before_normal
 
 == INSTALL:
 
-# If you haven't done this already:
-
-   gem sources -a http://gems.github.com
-
 # Now install
 
-   sudo gem install ismasan-hash_mapper
+   sudo gem install hash_mapper
 
 == Credits:
 
