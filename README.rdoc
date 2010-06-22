@@ -233,6 +233,7 @@ Note also that 'output' is correct at the time of the filter, i.e. before_normal
 * Mark Evans (Contributor - http://github.com/markevans)
 * Jdeveloper (Contributor - http://github.com/jdeveloper)
 * nightscape (Contributor - http://github.com/nightscape)
+* radamanthus (Contributor - http://github.com/radamanthus)
 
 == LICENSE:
 
