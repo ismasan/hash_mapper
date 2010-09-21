@@ -120,10 +120,8 @@ module HashMapper
 
     def process_into(output, input, meth = :normalize)
       path_1, path_2 = (meth == :normalize ? [path_from, path_to] : [path_to, path_from])
-      catch :no_value do
-        value = get_value_from_input(output, input, path_1, meth)
-        add_value_to_hash!(output, path_2, value)
-      end
+      value = get_value_from_input(output, input, path_1, meth)
+      add_value_to_hash!(output, path_2, value) unless value == :hash_mapper_no_value
     end
     protected
 
@@ -134,7 +132,7 @@ module HashMapper
         else
           v = h[e]
         end
-        throw :no_value if v.nil?#.has_key?(e)
+        return :hash_mapper_no_value if v.nil?
         v
       end
       delegated_mapper ? delegate_to_nested_mapper(value, meth) : value
@@ -146,7 +144,7 @@ module HashMapper
       when Array
         value.map {|h| delegated_mapper.send(meth, h)}
       when nil
-        throw :no_value
+        return :hash_mapper_no_value
       else
         delegated_mapper.send(meth, value)
       end
