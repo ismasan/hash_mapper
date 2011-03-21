@@ -53,7 +53,7 @@ You can use HashMapper in your own little hash-like objects:
 
    class NiceHash
      include Enumerable
-     extend HashMap
+     extend HashMapper
      
      map from('/names/first'), to('/first_name')
      map from('/names/last'), to('/last_name')
