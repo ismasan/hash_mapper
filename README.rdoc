@@ -14,68 +14,74 @@ It is a module so it doesn't get in the way of your inheritance tree.
 
 == SYNOPSIS:
 
-   class ManyLevels
-     extend HashMapper
-     map from('/name'),            to('/tag_attributes/name')
-     map from('/properties/type'), to('/tag_attributes/type')
-     map from('/tagid'),           to('/tag_id')
-     map from('/properties/egg'),  to('/chicken')
-   end
+```ruby
+class ManyLevels
+  extend HashMapper
+  map from('/name'),            to('/tag_attributes/name')
+  map from('/properties/type'), to('/tag_attributes/type')
+  map from('/tagid'),           to('/tag_id')
+  map from('/properties/egg'),  to('/chicken')
+end
 
-   input = 	{
-     :name => 'ismael',
-     :tagid => 1,
-     :properties => {
-       :type => 'BLAH',
-       :egg => 33
-     }
-   }
+input = 	{
+  :name => 'ismael',
+  :tagid => 1,
+  :properties => {
+    :type => 'BLAH',
+    :egg => 33
+  }
+}
 
-   ManyLevels.normalize(input)
+ManyLevels.normalize(input)
 
-   # outputs:
-   	{
-     :tag_id => 1,
-     :chicken => 33,
-     :tag_attributes => {
-       :name => 'ismael',
-       :type => 'BLAH'
-     }
-   }
+# outputs:
+	{
+  :tag_id => 1,
+  :chicken => 33,
+  :tag_attributes => {
+    :name => 'ismael',
+    :type => 'BLAH'
+  }
+}
+```
 
 === Uses:
 
 HashMapper was primarily written as a way of mapping data structure in json requests to hashes with structures friendlier to our ActiveRecord models:
 
-   @article = Article.create( ArticleParams.normalize(params[:weird_article_data]) )
+```ruby
+@article = Article.create( ArticleParams.normalize(params[:weird_article_data]) )
+```
 
 You can use HashMapper in your own little hash-like objects:
 
-   class NiceHash
-     include Enumerable
-     extend HashMapper
-     
-     map from('/names/first'), to('/first_name')
-     map from('/names/last'), to('/last_name')
+```ruby
+class NiceHash
+  include Enumerable
+  extend HashMapper
+  
+  map from('/names/first'), to('/first_name')
+  map from('/names/last'), to('/last_name')
 
-     def initialize(input_hash)
-       @hash = self.class.normalize(input_hash)
-     end
+  def initialize(input_hash)
+    @hash = self.class.normalize(input_hash)
+  end
 
-     def [](k)
-       @hash[k]
-     end
+  def [](k)
+    @hash[k]
+  end
 
-     def []=(k,v)
-       @hash[k] = v
-     end
+  def []=(k,v)
+    @hash[k] = v
+  end
 
-     def each(&block)
-       @hash.each(&block)
-     end
-   end
+  def each(&block)
+    @hash.each(&block)
+  end
+end
 
-   @user = User.new(NiceHash.new(params))
+@user = User.new(NiceHash.new(params))
+```
 
 === Options:
 
@@ -83,30 +89,40 @@ You can use HashMapper in your own little hash-like objects:
 
 You want to make sure an incoming value gets converted to a certain type, so 
 
+```ruby
 {'one' => '1', 'two' => '2'} gets translated to {:one => 1, :two => 2}
+```
 
 Do this:
 
-   map from('/one'), to('/one', &:to_i)
-   map from('/two'), to('/two', &:to_i)
+```ruby
+map from('/one'), to('/one', &:to_i)
+map from('/two'), to('/two', &:to_i)
+```
 
 You can pass :to_i, :to_s or anything available method that makes sense. Don't forget the block notation (&).
 
 You guessed it. That means that you can actually pass custom blocks to each to() definition as well. The following is similar to the previous example:
 
-   map from('/one), to('/one'){|value| value.to_i}
+```ruby
+map from('/one), to('/one'){|value| value.to_i}
+```
 
 ==== Custom value filtering
 
 You want to pass the final value of a key through a custom filter:
 
+```ruby
 {:names => {:first => 'Ismael', :last => 'Celis'}} gets translated to {:user => 'Mr. Celis, Ismael'}
+```
 
 Do this:
 
-   map from('/names'), to('/user') do |names|
-     "Mr. #{names[1]}, #{names[0]}"
-   end
+```ruby
+map from('/names'), to('/user') do |names|
+  "Mr. #{names[1]}, #{names[0]}"
+end
+```
 
 === Mapping in reverse
 
@@ -114,11 +130,13 @@ Cool, you can map one hash into another, but what if I want the opposite operati
 
 Just use the denormalize() method instead:
 
-	input = {:first => 'Mark', :last => 'Evans'}
-	
-	output = NameMapper.normalize(input) # => {:first_name => 'Mark', :last_name => 'Evans'}
-	
-	NameMapper.denormalize(output) # => input
+```ruby
+input = {:first => 'Mark', :last => 'Evans'}
+
+output = NameMapper.normalize(input) # => {:first_name => 'Mark', :last_name => 'Evans'}
+
+NameMapper.denormalize(output) # => input
+```
 	
 This will work with your block filters and even nested mappers (see below).
 	
@@ -126,64 +144,82 @@ This will work with your block filters and even nested mappers (see below).
 ==== Array access
 You want:
 
-{:names => ['Ismael', 'Celis']} converted to {:first_name => 'Ismael', :last_name => 'Celis'}
+```ruby
+{:names => ['Ismael', 'Celis']}
+```
+converted to
+```ruby
+{:first_name => 'Ismael', :last_name => 'Celis'}
+```
 
 Do this:
+```ruby
+map from('/names[0]'), to('/first_name')
+map from('/names[1]'), to('/last_name')
+```
 
-   map from('/names[0]'), to('/first_name')
-   map from('/names[1]'), to('/last_name')
 ==== Nested mappers
 
 You want to map nested structures delegating to different mappers:
 
 From this:
+```ruby
 input = {
 	:project 		=> 'HashMapper',
 	:url			=> 'http://github.com/ismasan/hash_mapper',
 	:author_names	=> {:first => 'Ismael', :last => 'Celis'}
 }
+```
 To this:
+```ruby
 output = {
 	:project_name	=> 'HashMapper',
 	:url			=> 'http://github.com/ismasan/hash_mapper',
 	:author			=> {:first_name => 'Ismael', :last_name => 'Celis'}
 }
+```
 
 Define an UserMapper separate from your ProjectMapper, so you reuse them combined or standalone
 
-   class UserMapper
-     extend HashMapper
-     map from('/first'),	to('/first_name')
-     map from('/last'),		to('/lastt_name')
-   end
+```ruby
+class UserMapper
+  extend HashMapper
+  map from('/first'),	to('/first_name')
+  map from('/last'),		to('/lastt_name')
+end
 
-   class ProjectMapper
-     extend HashMapper
-     map from('/project'), 		to('/project_name')
-     map from('/url'),			to('/url')
-     map from('/author_names'),	to('/author'), using(UserMapper)
-   end
+class ProjectMapper
+  extend HashMapper
+  map from('/project'), 		to('/project_name')
+  map from('/url'),			to('/url')
+  map from('/author_names'),	to('/author'), using(UserMapper)
+end
+```
 
 Now ProjectMapper will delegate parsing of :author_names to UserMapper
-
-   ProjectMapper.normalize( input ) # => output
+```ruby
+ProjectMapper.normalize( input ) # => output
+```
 
 Let's say you have a CompanyMapper which maps a hash with an array of employees, and you want to reuse UserMapper to map each employee. You could:
 
-   class CompanyMapper
-     map from('/info/name'), 			to('/company_name')
-     map form('/info/address'),			to('/company_address')
-     map from('/info/year_founded'),	to('year_founded', :to_i)
+```ruby
+class CompanyMapper
+  map from('/info/name'), 			to('/company_name')
+  map form('/info/address'),			to('/company_address')
+  map from('/info/year_founded'),	to('year_founded', :to_i)
 
-     map from('/employees'),			to('employees') do |employees_array|
-       employees_array.collect {|emp_hash| UserMapper.normalize(emp_hash)}
-     end
-   end
+  map from('/employees'),			to('employees') do |employees_array|
+    employees_array.collect {|emp_hash| UserMapper.normalize(emp_hash)}
+  end
+end
+```
 
 But HashMapper's nested mappers will actually do that for you if a value is an array, so:
-	
-	map from('/employees'),	to('employees'), using(UserMapper)
-	
+
+```ruby	
+map from('/employees'),	to('employees'), using(UserMapper)
+```
 ... Will map each employee using UserMapper.
 
 ==== Before and after filters
@@ -194,19 +230,21 @@ For this you can use the class methods before_normalize, before_denormalize, aft
 
 They all yield a block with 2 arguments - the hash you are mapping from and the hash you are mapping to, e.g.
 
-  class EggMapper
-    map from('/raw'), to('/fried')
-    
-    before_normalize do |input, output|
-      input['raw'] ||= 'please'     # this will give 'raw' a default value 
-      input
-    end
-    
-    after_denormalize do |input, output|
-      output.to_a        # the denormalized object will now be an array, not a hash!!
-    end
-
+```ruby
+class EggMapper
+  map from('/raw'), to('/fried')
+  
+  before_normalize do |input, output|
+    input['raw'] ||= 'please'     # this will give 'raw' a default value 
+    input
   end
+  
+  after_denormalize do |input, output|
+    output.to_a        # the denormalized object will now be an array, not a hash!!
+  end
+
+end
+```
 
 Important: note that for before filters, you need to return the (modified) input, and for after filters, you need to return the output.
 Note also that 'output' is correct at the time of the filter, i.e. before_normalize yields 'output' as an empty hash, while after_normalize yields it as an already normalized hash.
