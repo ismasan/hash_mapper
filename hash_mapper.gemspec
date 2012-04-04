@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
      "spec/spec_helper.rb",
      "tasks/rspec.rake"
   ]
-  s.homepage = %q{http://github.com/ismasan/hash_mapper}
+  s.homepage = %q{http://ismasan.github.com/hash_mapper/}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}

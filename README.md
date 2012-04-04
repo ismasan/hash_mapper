@@ -1,6 +1,6 @@
 # hash_mapper
 
-* http://github.com/ismasan/hash_mapper
+* http://ismasan.github.com/hash_mapper/
 
 ## DESCRIPTION:
 
@@ -90,7 +90,13 @@ end
 You want to make sure an incoming value gets converted to a certain type, so 
 
 ```ruby
-{'one' => '1', 'two' => '2'} gets translated to {:one => 1, :two => 2}
+{'one' => '1', 'two' => '2'}
+```
+
+gets translated to
+
+```ruby`
+{:one => 1, :two => 2}
 ```
 
 Do this:
@@ -147,12 +153,15 @@ You want:
 ```ruby
 {:names => ['Ismael', 'Celis']}
 ```
+
 converted to
+
 ```ruby
 {:first_name => 'Ismael', :last_name => 'Celis'}
 ```
 
 Do this:
+
 ```ruby
 map from('/names[0]'), to('/first_name')
 map from('/names[1]'), to('/last_name')
@@ -163,6 +172,7 @@ map from('/names[1]'), to('/last_name')
 You want to map nested structures delegating to different mappers:
 
 From this:
+
 ```ruby
 input = {
 	:project 		=> 'HashMapper',
@@ -170,7 +180,9 @@ input = {
 	:author_names	=> {:first => 'Ismael', :last => 'Celis'}
 }
 ```
+
 To this:
+
 ```ruby
 output = {
 	:project_name	=> 'HashMapper',
@@ -197,6 +209,7 @@ end
 ```
 
 Now ProjectMapper will delegate parsing of :author_names to UserMapper
+
 ```ruby
 ProjectMapper.normalize( input ) # => output
 ```
@@ -261,9 +274,8 @@ Note also that 'output' is correct at the time of the filter, i.e. before_normal
 
 ## INSTALL:
 
-# Now install
 
-   sudo gem install hash_mapper
+   gem install hash_mapper
 
 ## Credits:
 
