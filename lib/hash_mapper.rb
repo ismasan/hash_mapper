@@ -1,3 +1,5 @@
+require 'hash_mapper/version'
+
 $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
@@ -5,7 +7,7 @@ def require_active_support
   require 'active_support/core_ext/array/extract_options'
   require 'active_support/core_ext/hash/indifferent_access'
   require 'active_support/core_ext/object/duplicable'
-  require 'active_support/core_ext/class/inheritable_attributes'
+  require 'active_support/core_ext/class/attribute'
 end
 
 begin
@@ -42,12 +44,13 @@ module HashMapper
   #
   def self.extended(base)
     base.class_eval do
-      write_inheritable_attribute :maps, []
-      class_inheritable_accessor :maps
+      class_attribute :maps
+      self.maps = []
     end
   end
 
   def map(from, to, using=nil, &filter)
+    self.maps = self.maps.dup
     self.maps << Map.new(from, to, using)
     to.filter = filter if block_given? # Useful if just one block given
   end
@@ -97,7 +100,7 @@ module HashMapper
     before_filter = instance_eval "@before_#{meth}"
     a_hash = before_filter.call(a_hash, output) if before_filter
     # Do the mapping
-    maps.each do |m|
+    self.maps.each do |m|
       m.process_into(output, a_hash, meth)
     end
     # After filter

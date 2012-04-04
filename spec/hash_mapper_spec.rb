@@ -1,11 +1,11 @@
-require File.dirname(__FILE__) + '/spec_helper.rb'
+require 'spec_helper.rb'
 
 class OneLevel
   extend HashMapper
   map from('/name'),            to('/nombre')
 end
 
-describe 'mapping a hash wit one level' do
+describe 'mapping a hash with one level' do
   
   before :each do
     @from = {:name => 'ismael'}
