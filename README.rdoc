@@ -1,18 +1,18 @@
-= hash_mapper
+# hash_mapper
 
 * http://github.com/ismasan/hash_mapper
 
-== DESCRIPTION:
+## DESCRIPTION:
 
 Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json).
  
 Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.
 
-== FEATURES/PROBLEMS:
+## FEATURES/PROBLEMS:
 
 It is a module so it doesn't get in the way of your inheritance tree.
 
-== SYNOPSIS:
+## SYNOPSIS:
 
 ```ruby
 class ManyLevels
@@ -45,7 +45,7 @@ ManyLevels.normalize(input)
 }
 ```
 
-=== Uses:
+### Uses:
 
 HashMapper was primarily written as a way of mapping data structure in json requests to hashes with structures friendlier to our ActiveRecord models:
 
@@ -83,9 +83,9 @@ end
 @user = User.new(NiceHash.new(params))
 ```
 
-=== Options:
+### Options:
 
-==== Coercing values
+#### Coercing values
 
 You want to make sure an incoming value gets converted to a certain type, so 
 
@@ -108,7 +108,7 @@ You guessed it. That means that you can actually pass custom blocks to each to()
 map from('/one), to('/one'){|value| value.to_i}
 ```
 
-==== Custom value filtering
+#### Custom value filtering
 
 You want to pass the final value of a key through a custom filter:
 
@@ -124,7 +124,7 @@ map from('/names'), to('/user') do |names|
 end
 ```
 
-=== Mapping in reverse
+### Mapping in reverse
 
 Cool, you can map one hash into another, but what if I want the opposite operation?
 
@@ -140,8 +140,8 @@ NameMapper.denormalize(output) # => input
 	
 This will work with your block filters and even nested mappers (see below).
 	
-=== Advanced usage
-==== Array access
+### Advanced usage
+#### Array access
 You want:
 
 ```ruby
@@ -158,7 +158,7 @@ map from('/names[0]'), to('/first_name')
 map from('/names[1]'), to('/last_name')
 ```
 
-==== Nested mappers
+#### Nested mappers
 
 You want to map nested structures delegating to different mappers:
 
@@ -222,7 +222,7 @@ map from('/employees'),	to('employees'), using(UserMapper)
 ```
 ... Will map each employee using UserMapper.
 
-==== Before and after filters
+#### Before and after filters
 
 Sometimes you will need some slightly more complex processing on the whole hash, either before or after normalizing/denormalizing.
 
@@ -250,22 +250,22 @@ Important: note that for before filters, you need to return the (modified) input
 Note also that 'output' is correct at the time of the filter, i.e. before_normalize yields 'output' as an empty hash, while after_normalize yields it as an already normalized hash.
 
    
-== REQUIREMENTS:
+## REQUIREMENTS:
 
-== TODO:
+## TODO:
 
 
-==== Optimizations
+#### Optimizations
 
 * Get rid of ActiveSupport (used for inherited class variables and HashWithIndifferentAccess)
 
-== INSTALL:
+## INSTALL:
 
 # Now install
 
    sudo gem install hash_mapper
 
-== Credits:
+## Credits:
 
 * Ismael Celis (Author - http://www.estadobeta.com)
 * Mark Evans (Contributor - http://github.com/markevans)
@@ -273,7 +273,7 @@ Note also that 'output' is correct at the time of the filter, i.e. before_normal
 * nightscape (Contributor - http://github.com/nightscape)
 * radamanthus (Contributor - http://github.com/radamanthus)
 
-== LICENSE:
+## LICENSE:
 
 (The MIT License)
 
