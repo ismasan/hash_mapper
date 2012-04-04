@@ -1,0 +1,399 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Hash mapper by ismasan</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/main.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+
+      <header>
+        <h1>Hash mapper</h1>
+        <p>Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.</p>
+      </header>
+
+      <div id="banner">
+        <span id="logo"></span>
+
+        <a href="https://github.com/ismasan/hash_mapper" class="button fork"><strong>Fork On GitHub</strong></a>
+        <div class="downloads">
+          <span>Downloads:</span>
+          <ul>
+            <li><a href="https://github.com/ismasan/hash_mapper/zipball/master" class="button">ZIP</a></li>
+            <li><a href="https://github.com/ismasan/hash_mapper/tarball/master" class="button">TAR</a></li>
+          </ul>
+        </div>
+
+      </div><!-- end banner -->
+
+    <div class="wrapper">
+      <nav>
+        <ul></ul>
+      </nav>
+      <section>
+        <h1>hash_mapper</h1>
+
+<ul>
+<li><a href="http://github.com/ismasan/hash_mapper">http://github.com/ismasan/hash_mapper</a></li>
+</ul><h2>DESCRIPTION:</h2>
+
+<p>Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json).</p>
+
+<p>Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.</p>
+
+<h2>FEATURES/PROBLEMS:</h2>
+
+<p>It is a module so it doesn't get in the way of your inheritance tree.</p>
+
+<h2>SYNOPSIS:</h2>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">ManyLevels</span>
+  <span class="kp">extend</span> <span class="no">HashMapper</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/name'</span><span class="p">),</span>            <span class="n">to</span><span class="p">(</span><span class="s1">'/tag_attributes/name'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/properties/type'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/tag_attributes/type'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/tagid'</span><span class="p">),</span>           <span class="n">to</span><span class="p">(</span><span class="s1">'/tag_id'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/properties/egg'</span><span class="p">),</span>  <span class="n">to</span><span class="p">(</span><span class="s1">'/chicken'</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="n">input</span> <span class="o">=</span>     <span class="p">{</span>
+  <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'ismael'</span><span class="p">,</span>
+  <span class="ss">:tagid</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="ss">:properties</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="ss">:type</span> <span class="o">=&gt;</span> <span class="s1">'BLAH'</span><span class="p">,</span>
+    <span class="ss">:egg</span> <span class="o">=&gt;</span> <span class="mi">33</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="no">ManyLevels</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">input</span><span class="p">)</span>
+
+<span class="c1"># outputs:</span>
+    <span class="p">{</span>
+  <span class="ss">:tag_id</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="ss">:chicken</span> <span class="o">=&gt;</span> <span class="mi">33</span><span class="p">,</span>
+  <span class="ss">:tag_attributes</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'ismael'</span><span class="p">,</span>
+    <span class="ss">:type</span> <span class="o">=&gt;</span> <span class="s1">'BLAH'</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre>
+</div>
+
+
+<h3>Uses:</h3>
+
+<p>HashMapper was primarily written as a way of mapping data structure in json requests to hashes with structures friendlier to our ActiveRecord models:</p>
+
+<div class="highlight">
+<pre><span class="vi">@article</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="no">ArticleParams</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:weird_article_data</span><span class="o">]</span><span class="p">)</span> <span class="p">)</span>
+</pre>
+</div>
+
+
+<p>You can use HashMapper in your own little hash-like objects:</p>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">NiceHash</span>
+  <span class="kp">include</span> <span class="no">Enumerable</span>
+  <span class="kp">extend</span> <span class="no">HashMapper</span>
+
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/names/first'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/first_name'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/names/last'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/last_name'</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">input_hash</span><span class="p">)</span>
+    <span class="vi">@hash</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">input_hash</span><span class="p">)</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">[]</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="vi">@hash</span><span class="o">[</span><span class="n">k</span><span class="o">]</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">[]=</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+    <span class="vi">@hash</span><span class="o">[</span><span class="n">k</span><span class="o">]</span> <span class="o">=</span> <span class="n">v</span>
+  <span class="k">end</span>
+
+  <span class="k">def</span> <span class="nf">each</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="vi">@hash</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+
+<span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">NiceHash</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+</pre>
+</div>
+
+
+<h3>Options:</h3>
+
+<h4>Coercing values</h4>
+
+<p>You want to make sure an incoming value gets converted to a certain type, so </p>
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="s1">'one'</span> <span class="o">=&gt;</span> <span class="s1">'1'</span><span class="p">,</span> <span class="s1">'two'</span> <span class="o">=&gt;</span> <span class="s1">'2'</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<p>gets translated to</p>
+
+<pre lang="ruby`"><code>{:one =&gt; 1, :two =&gt; 2}
+</code></pre>
+
+<p>Do this:</p>
+
+<div class="highlight">
+<pre><span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/one'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/one'</span><span class="p">,</span> <span class="o">&amp;</span><span class="ss">:to_i</span><span class="p">)</span>
+<span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/two'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/two'</span><span class="p">,</span> <span class="o">&amp;</span><span class="ss">:to_i</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<p>You can pass :to_i, :to_s or anything available method that makes sense. Don't forget the block notation (&amp;).</p>
+
+<p>You guessed it. That means that you can actually pass custom blocks to each to() definition as well. The following is similar to the previous example:</p>
+
+<div class="highlight">
+<pre><span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/one), to('</span><span class="o">/</span><span class="n">one</span><span class="err">'</span><span class="p">){</span><span class="o">|</span><span class="n">value</span><span class="o">|</span> <span class="n">value</span><span class="o">.</span><span class="n">to_i</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<h4>Custom value filtering</h4>
+
+<p>You want to pass the final value of a key through a custom filter:</p>
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="ss">:names</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:first</span> <span class="o">=&gt;</span> <span class="s1">'Ismael'</span><span class="p">,</span> <span class="ss">:last</span> <span class="o">=&gt;</span> <span class="s1">'Celis'</span><span class="p">}}</span> <span class="nb">gets</span> <span class="n">translated</span> <span class="n">to</span> <span class="p">{</span><span class="ss">:user</span> <span class="o">=&gt;</span> <span class="s1">'Mr. Celis, Ismael'</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<p>Do this:</p>
+
+<div class="highlight">
+<pre><span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/names'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/user'</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">names</span><span class="o">|</span>
+  <span class="s2">"Mr. </span><span class="si">#{</span><span class="n">names</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span><span class="si">}</span><span class="s2">, </span><span class="si">#{</span><span class="n">names</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<h3>Mapping in reverse</h3>
+
+<p>Cool, you can map one hash into another, but what if I want the opposite operation?</p>
+
+<p>Just use the denormalize() method instead:</p>
+
+<div class="highlight">
+<pre><span class="n">input</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:first</span> <span class="o">=&gt;</span> <span class="s1">'Mark'</span><span class="p">,</span> <span class="ss">:last</span> <span class="o">=&gt;</span> <span class="s1">'Evans'</span><span class="p">}</span>
+
+<span class="n">output</span> <span class="o">=</span> <span class="no">NameMapper</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">input</span><span class="p">)</span> <span class="c1"># =&gt; {:first_name =&gt; 'Mark', :last_name =&gt; 'Evans'}</span>
+
+<span class="no">NameMapper</span><span class="o">.</span><span class="n">denormalize</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="c1"># =&gt; input</span>
+</pre>
+</div>
+
+
+<p>This will work with your block filters and even nested mappers (see below).</p>
+
+<h3>Advanced usage</h3>
+
+<h4>Array access</h4>
+
+<p>You want:</p>
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="ss">:names</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s1">'Ismael'</span><span class="p">,</span> <span class="s1">'Celis'</span><span class="o">]</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<p>converted to</p>
+
+<div class="highlight">
+<pre><span class="p">{</span><span class="ss">:first_name</span> <span class="o">=&gt;</span> <span class="s1">'Ismael'</span><span class="p">,</span> <span class="ss">:last_name</span> <span class="o">=&gt;</span> <span class="s1">'Celis'</span><span class="p">}</span>
+</pre>
+</div>
+
+
+<p>Do this:</p>
+
+<div class="highlight">
+<pre><span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/names[0]'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/first_name'</span><span class="p">)</span>
+<span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/names[1]'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/last_name'</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<h4>Nested mappers</h4>
+
+<p>You want to map nested structures delegating to different mappers:</p>
+
+<p>From this:</p>
+
+<div class="highlight">
+<pre><span class="n">input</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">:project</span>        <span class="o">=&gt;</span> <span class="s1">'HashMapper'</span><span class="p">,</span>
+    <span class="ss">:url</span>            <span class="o">=&gt;</span> <span class="s1">'<a href="http://github.com/ismasan/hash_mapper">http://github.com/ismasan/hash_mapper</a>'</span><span class="p">,</span>
+    <span class="ss">:author_names</span>   <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:first</span> <span class="o">=&gt;</span> <span class="s1">'Ismael'</span><span class="p">,</span> <span class="ss">:last</span> <span class="o">=&gt;</span> <span class="s1">'Celis'</span><span class="p">}</span>
+<span class="p">}</span>
+</pre>
+</div>
+
+
+<p>To this:</p>
+
+<div class="highlight">
+<pre><span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="ss">:project_name</span>   <span class="o">=&gt;</span> <span class="s1">'HashMapper'</span><span class="p">,</span>
+    <span class="ss">:url</span>            <span class="o">=&gt;</span> <span class="s1">'<a href="http://github.com/ismasan/hash_mapper">http://github.com/ismasan/hash_mapper</a>'</span><span class="p">,</span>
+    <span class="ss">:author</span>         <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:first_name</span> <span class="o">=&gt;</span> <span class="s1">'Ismael'</span><span class="p">,</span> <span class="ss">:last_name</span> <span class="o">=&gt;</span> <span class="s1">'Celis'</span><span class="p">}</span>
+<span class="p">}</span>
+</pre>
+</div>
+
+
+<p>Define an UserMapper separate from your ProjectMapper, so you reuse them combined or standalone</p>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">UserMapper</span>
+  <span class="kp">extend</span> <span class="no">HashMapper</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/first'</span><span class="p">),</span>   <span class="n">to</span><span class="p">(</span><span class="s1">'/first_name'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/last'</span><span class="p">),</span>        <span class="n">to</span><span class="p">(</span><span class="s1">'/lastt_name'</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">ProjectMapper</span>
+  <span class="kp">extend</span> <span class="no">HashMapper</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/project'</span><span class="p">),</span>         <span class="n">to</span><span class="p">(</span><span class="s1">'/project_name'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/url'</span><span class="p">),</span>         <span class="n">to</span><span class="p">(</span><span class="s1">'/url'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/author_names'</span><span class="p">),</span>    <span class="n">to</span><span class="p">(</span><span class="s1">'/author'</span><span class="p">),</span> <span class="n">using</span><span class="p">(</span><span class="no">UserMapper</span><span class="p">)</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>Now ProjectMapper will delegate parsing of :author_names to UserMapper</p>
+
+<div class="highlight">
+<pre><span class="no">ProjectMapper</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span> <span class="n">input</span> <span class="p">)</span> <span class="c1"># =&gt; output</span>
+</pre>
+</div>
+
+
+<p>Let's say you have a CompanyMapper which maps a hash with an array of employees, and you want to reuse UserMapper to map each employee. You could:</p>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">CompanyMapper</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/info/name'</span><span class="p">),</span>           <span class="n">to</span><span class="p">(</span><span class="s1">'/company_name'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">form</span><span class="p">(</span><span class="s1">'/info/address'</span><span class="p">),</span>            <span class="n">to</span><span class="p">(</span><span class="s1">'/company_address'</span><span class="p">)</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/info/year_founded'</span><span class="p">),</span>   <span class="n">to</span><span class="p">(</span><span class="s1">'year_founded'</span><span class="p">,</span> <span class="ss">:to_i</span><span class="p">)</span>
+
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/employees'</span><span class="p">),</span>           <span class="n">to</span><span class="p">(</span><span class="s1">'employees'</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">employees_array</span><span class="o">|</span>
+    <span class="n">employees_array</span><span class="o">.</span><span class="n">collect</span> <span class="p">{</span><span class="o">|</span><span class="n">emp_hash</span><span class="o">|</span> <span class="no">UserMapper</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">emp_hash</span><span class="p">)}</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>But HashMapper's nested mappers will actually do that for you if a value is an array, so:</p>
+
+<div class="highlight">
+<pre><span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/employees'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'employees'</span><span class="p">),</span> <span class="n">using</span><span class="p">(</span><span class="no">UserMapper</span><span class="p">)</span>
+</pre>
+</div>
+
+
+<p>... Will map each employee using UserMapper.</p>
+
+<h4>Before and after filters</h4>
+
+<p>Sometimes you will need some slightly more complex processing on the whole hash, either before or after normalizing/denormalizing.</p>
+
+<p>For this you can use the class methods before_normalize, before_denormalize, after_normalize and after_denormalize.</p>
+
+<p>They all yield a block with 2 arguments - the hash you are mapping from and the hash you are mapping to, e.g.</p>
+
+<div class="highlight">
+<pre><span class="k">class</span> <span class="nc">EggMapper</span>
+  <span class="n">map</span> <span class="n">from</span><span class="p">(</span><span class="s1">'/raw'</span><span class="p">),</span> <span class="n">to</span><span class="p">(</span><span class="s1">'/fried'</span><span class="p">)</span>
+
+  <span class="n">before_normalize</span> <span class="k">do</span> <span class="o">|</span><span class="n">input</span><span class="p">,</span> <span class="n">output</span><span class="o">|</span>
+    <span class="n">input</span><span class="o">[</span><span class="s1">'raw'</span><span class="o">]</span> <span class="o">||=</span> <span class="s1">'please'</span>     <span class="c1"># this will give 'raw' a default value </span>
+    <span class="n">input</span>
+  <span class="k">end</span>
+
+  <span class="n">after_denormalize</span> <span class="k">do</span> <span class="o">|</span><span class="n">input</span><span class="p">,</span> <span class="n">output</span><span class="o">|</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">to_a</span>        <span class="c1"># the denormalized object will now be an array, not a hash!!</span>
+  <span class="k">end</span>
+
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>Important: note that for before filters, you need to return the (modified) input, and for after filters, you need to return the output.
+Note also that 'output' is correct at the time of the filter, i.e. before_normalize yields 'output' as an empty hash, while after_normalize yields it as an already normalized hash.</p>
+
+<h2>REQUIREMENTS:</h2>
+
+<h2>TODO:</h2>
+
+<h4>Optimizations</h4>
+
+<ul>
+<li>Get rid of ActiveSupport (used for inherited class variables and HashWithIndifferentAccess)</li>
+</ul><h2>INSTALL:</h2>
+
+<p>gem install hash_mapper</p>
+
+<h2>Credits:</h2>
+
+<ul>
+<li>Ismael Celis (Author - <a href="http://www.estadobeta.com">http://www.estadobeta.com</a>)</li>
+<li>Mark Evans (Contributor - <a href="http://github.com/markevans">http://github.com/markevans</a>)</li>
+<li>Jdeveloper (Contributor - <a href="http://github.com/jdeveloper">http://github.com/jdeveloper</a>)</li>
+<li>nightscape (Contributor - <a href="http://github.com/nightscape">http://github.com/nightscape</a>)</li>
+<li>radamanthus (Contributor - <a href="http://github.com/radamanthus">http://github.com/radamanthus</a>)</li>
+</ul><h2>LICENSE:</h2>
+
+<p>(The MIT License)</p>
+
+<p>Copyright (c) 2009 Ismael Celis</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+      </section>
+      <footer>
+        <p>Project maintained by <a href="https://github.com/ismasan">ismasan</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+  </body>
+</html>
