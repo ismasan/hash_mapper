@@ -1,11 +1,10 @@
 $:.unshift(File.dirname(__FILE__)) unless
-  $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
+$:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 def require_active_support
   require 'active_support/core_ext/array/extract_options'
   require 'active_support/core_ext/hash/indifferent_access'
   require 'active_support/core_ext/object/duplicable'
-  require 'active_support/core_ext/class/inheritable_attributes'
 end
 
 begin
@@ -38,12 +37,15 @@ end
 
 module HashMapper
 
-  # we need this for inheritable mappers, which is annoying because it needs ActiveSupport, kinda overkill.
-  #
   def self.extended(base)
     base.class_eval do
-      write_inheritable_attribute :maps, []
-      class_inheritable_accessor :maps
+      def self.maps
+        if (superclass.respond_to? :maps)
+          @maps ||= superclass.maps.dup
+        else
+          @maps ||= []
+        end
+      end
     end
   end
 
@@ -210,7 +212,6 @@ module HashMapper
     KEY_NAME_REGEXP = /([^\[]*)(\[(\d+)+\])?/
 
     def parse(path)
-
       segments = path.sub(/^\//,'').split('/')
       segments = segments.collect do |segment|
         matches = segment.to_s.scan(KEY_NAME_REGEXP).flatten.compact
