@@ -9,8 +9,6 @@ Gem::Specification.new do |s|
   s.description = %q{Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.}
   s.date        = %q{2010-09-21}
   s.email       = %q{ismaelct@gmail.com}
-
-  s.extra_rdoc_files = ['README.rdoc']
   
   s.files         = `git ls-files`.split("\n")
   s.homepage      = %q{http://github.com/ismasan/hash_mapper}
