@@ -20,7 +20,7 @@ end
 
 
 # This allows us to call blah(&:some_method) instead of blah{|i| i.some_method }
-unless Symbol.instance_methods.include?('to_proc')
+unless :symbol.respond_to?(:to_proc)
   class Symbol
     def to_proc
       Proc.new {|obj| obj.send(self) }
@@ -29,7 +29,7 @@ unless Symbol.instance_methods.include?('to_proc')
 end
 
 # http://rpheath.com/posts/341-ruby-inject-with-index
-unless Array.instance_methods.include?("inject_with_index")
+unless [].respond_to?(:inject_with_index)
   module Enumerable
     def inject_with_index(injected)
       each_with_index{ |obj, index| injected = yield(injected, obj, index) }
