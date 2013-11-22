@@ -20,9 +20,9 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
   
   if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-    s.add_runtime_dependency("activesupport", "~> 3")
+    s.add_runtime_dependency("activesupport", "~> 4")
   else
-    s.add_dependency("activesupport", "~> 3")
+    s.add_dependency("activesupport", "~> 4")
   end
   
   # specify any dependencies here; for example:
