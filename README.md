@@ -279,7 +279,7 @@ Note also that 'output' is correct at the time of the filter, i.e. before_normal
 
 ## Credits:
 
-* Ismael Celis (Author - http://www.estadobeta.com)
+* Ismael Celis (Author - http://github.com/ismasan)
 * Mark Evans (Contributor - http://github.com/markevans)
 * Jdeveloper (Contributor - http://github.com/jdeveloper)
 * nightscape (Contributor - http://github.com/nightscape)
