@@ -111,7 +111,7 @@ You can pass :to_i, :to_s or anything available method that makes sense. Don't f
 You guessed it. That means that you can actually pass custom blocks to each to() definition as well. The following is similar to the previous example:
 
 ```ruby
-map from('/one), to('/one'){|value| value.to_i}
+map from('/one'), to('/one'){|value| value.to_i}
 ```
 
 #### Custom value filtering
