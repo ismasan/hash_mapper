@@ -62,6 +62,7 @@ module HashMapper
   alias :to :from
 
   def using(mapper_class)
+    warn "[DEPRECATION] `using` is deprecated, instead of `using(#{mapper_class.name})` you should specify `{ using: #{mapper_class.name} }`"
     { using: mapper_class }
   end
 
