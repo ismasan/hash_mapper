@@ -47,9 +47,9 @@ module HashMapper
     end
   end
 
-  def map(from, to, using=nil, &filter)
+  def map(from, to, options={}, &filter)
     self.maps = self.maps.dup
-    self.maps << Map.new(from, to, using)
+    self.maps << Map.new(from, to, options)
     to.filter = filter if block_given? # Useful if just one block given
   end
 
@@ -62,7 +62,7 @@ module HashMapper
   alias :to :from
 
   def using(mapper_class)
-    mapper_class
+    { using: mapper_class }
   end
 
   def normalize(a_hash)
@@ -113,16 +113,19 @@ module HashMapper
   #
   class Map
 
-    attr_reader :path_from, :path_to, :delegated_mapper
+    attr_reader :path_from, :path_to, :delegated_mapper, :default_value
 
-    def initialize(path_from, path_to, delegated_mapper = nil)
-      @path_from, @path_to, @delegated_mapper = path_from, path_to, delegated_mapper
+    def initialize(path_from, path_to, options = {})
+      @path_from = path_from
+      @path_to = path_to
+      @delegated_mapper = options.fetch(:using, nil)
+      @default_value = options.fetch(:default, :hash_mapper_no_default)
     end
 
     def process_into(output, input, meth = :normalize)
       path_1, path_2 = (meth == :normalize ? [path_from, path_to] : [path_to, path_from])
       value = get_value_from_input(output, input, path_1, meth)
-      add_value_to_hash!(output, path_2, value) unless value == :hash_mapper_no_value
+      set_value_in_output(output, path_2, value)
     end
     protected
 
@@ -139,6 +142,16 @@ module HashMapper
       delegated_mapper ? delegate_to_nested_mapper(value, meth) : value
     end
 
+    def set_value_in_output(output, path, value)
+      if value == :hash_mapper_no_value
+        if default_value == :hash_mapper_no_default
+          return
+        else
+          value = default_value
+        end
+      end
+      add_value_to_hash!(output, path, value)
+    end
 
     def delegate_to_nested_mapper(value, meth)
       case value
