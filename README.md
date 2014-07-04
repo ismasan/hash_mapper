@@ -114,6 +114,26 @@ You guessed it. That means that you can actually pass custom blocks to each to()
 map from('/one'), to('/one'){|value| value.to_i}
 ```
 
+#### Default values
+
+You want to make sure that a value is present in the output (even if it's not in the input) so that:
+
+```ruby
+{'one' => '1'}
+```
+
+gets translated to
+
+```ruby
+{:one => 1, :two => 2}
+```
+
+Do this:
+
+```ruby
+map from('/two'), to('/two'), default: 2
+```
+
 #### Custom value filtering
 
 You want to pass the final value of a key through a custom filter:
@@ -204,7 +224,7 @@ class ProjectMapper
   extend HashMapper
   map from('/project'), 		to('/project_name')
   map from('/url'),			to('/url')
-  map from('/author_names'),	to('/author'), using(UserMapper)
+  map from('/author_names'),	to('/author'), using: UserMapper
 end
 ```
 
@@ -231,7 +251,7 @@ end
 But HashMapper's nested mappers will actually do that for you if a value is an array, so:
 
 ```ruby	
-map from('/employees'),	to('employees'), using(UserMapper)
+map from('/employees'),	to('employees'), using: UserMapper
 ```
 ... Will map each employee using UserMapper.
 

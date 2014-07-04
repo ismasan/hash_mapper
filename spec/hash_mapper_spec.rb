@@ -426,3 +426,24 @@ describe "dealing with strings and symbols" do
   
 end
 
+class DefaultValues
+  extend HashMapper
+
+  map from('/without_default'), to('not_defaulted')
+  map from('/with_default'),    to('defaulted'), default: 'the_default_value'
+end
+
+describe "default values" do
+  it "should use a default value whenever a key is not set" do
+    DefaultValues.normalize(
+      'without_default' => 'some_value'
+    ).should == { not_defaulted: 'some_value', defaulted: 'the_default_value' }
+  end
+
+  it "should not use a default if a key is set (even if the value is falsy)" do
+    DefaultValues.normalize({
+        'without_default' => 'some_value',
+        'with_default' => false
+      }).should == { not_defaulted: 'some_value', defaulted: false }
+  end
+end
