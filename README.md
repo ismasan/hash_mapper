@@ -148,7 +148,7 @@ Do this:
 
 ```ruby
 map from('/names'), to('/user') do |names|
-  "Mr. #{names[1]}, #{names[0]}"
+  "Mr. #{names[:last]}, #{names[:first]}"
 end
 ```
 
