@@ -308,6 +308,7 @@ It is possible to define multiple filters of a given type. These are run in the 
 * Jdeveloper (Contributor - http://github.com/jdeveloper)
 * nightscape (Contributor - http://github.com/nightscape)
 * radamanthus (Contributor - http://github.com/radamanthus)
+* Tom Wey (Contributor - (https://github.com/tjmw)
 
 ## LICENSE:
 
