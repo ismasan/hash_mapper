@@ -447,3 +447,119 @@ describe "default values" do
       }).should == { not_defaulted: 'some_value', defaulted: false }
   end
 end
+
+class MultiBeforeFilter
+  extend HashMapper
+
+  before_normalize do |input, output|
+    input[:foo] << 'Y'
+    input
+  end
+
+  before_normalize do |input, output|
+    input[:foo] << 'Z'
+    input
+  end
+
+  before_denormalize do |input, output|
+    input[:bar].prepend('A')
+    input
+  end
+
+  before_denormalize do |input, output|
+    input[:bar].prepend('B')
+    input
+  end
+
+  map from('/foo'), to('bar')
+end
+
+class MultiBeforeFilterSubclass < MultiBeforeFilter
+  before_normalize do |input, output|
+    input[:foo] << '!'
+    input
+  end
+
+  before_denormalize do |input, output|
+    input[:bar].prepend('C')
+    input
+  end
+end
+
+describe 'multiple before filters' do
+  it 'runs before_normalize filters in the order they are defined' do
+    MultiBeforeFilter.normalize({ foo: 'X' }).should == { bar: 'XYZ' }
+  end
+
+  it 'runs before_denormalize filters in the order they are defined' do
+    MultiBeforeFilter.denormalize({ bar: 'X' }).should == { foo: 'BAX' }
+  end
+
+  context 'when the filters are spread across classes' do
+    it 'runs before_normalize filters in the order they are defined' do
+      MultiBeforeFilterSubclass.normalize({ foo: 'X' }).should == { bar: 'XYZ!' }
+    end
+
+    it 'runs before_denormalize filters in the order they are defined' do
+      MultiBeforeFilterSubclass.denormalize({ bar: 'X' }).should == { foo: 'CBAX' }
+    end
+  end
+end
+
+class MultiAfterFilter
+  extend HashMapper
+
+  map from('/baz'), to('bat')
+
+  after_normalize do |input, output|
+    output[:bat] << '1'
+    output
+  end
+
+  after_normalize do |input, output|
+    output[:bat] << '2'
+    output
+  end
+
+  after_denormalize do |input, output|
+    output[:baz].prepend('9')
+    output
+  end
+
+  after_denormalize do |input, output|
+    output[:baz].prepend('8')
+    output
+  end
+end
+
+class MultiAfterFilterSubclass < MultiAfterFilter
+  after_normalize do |input, output|
+    output[:bat] << '3'
+    output
+  end
+
+  after_denormalize do |input, output|
+    output[:baz].prepend('7')
+    output
+  end
+end
+
+describe 'multiple after filters' do
+  it 'runs after_normalize filters in the order they are defined' do
+    MultiAfterFilter.normalize({ baz: '0' }).should == { bat: '012' }
+  end
+
+  it 'runs after_denormalize filters in the order they are defined' do
+    MultiAfterFilter.denormalize({ bat: '0' }).should == { baz: '890' }
+  end
+
+  context 'when the filters are spread across classes' do
+    it 'runs after_normalize filters in the order they are defined' do
+      MultiAfterFilterSubclass.normalize({ baz: '0' }).should == { bat: '0123' }
+    end
+
+    it 'runs after_denormalize filters in the order they are defined' do
+      MultiAfterFilterSubclass.denormalize({ bat: '0' }).should == { baz: '7890' }
+    end
+  end
+end

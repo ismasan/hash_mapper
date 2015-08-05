@@ -284,6 +284,8 @@ end
 Important: note that for before filters, you need to return the (modified) input, and for after filters, you need to return the output.
 Note also that 'output' is correct at the time of the filter, i.e. before_normalize yields 'output' as an empty hash, while after_normalize yields it as an already normalized hash.
 
+It is possible to define multiple filters of a given type. These are run in the order in which they are defined. A common use case might be to define a `before_normalize` filter in a parent class and a child class. The output from the previous invocation of the filter is passed as the input of the next invocation.
+
    
 ## REQUIREMENTS:
 
