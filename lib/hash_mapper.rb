@@ -42,8 +42,15 @@ module HashMapper
 
   def self.extended(base)
     base.class_eval do
-      class_attribute :maps
+      class_attribute :maps, :before_normalize_filters,
+        :before_denormalize_filters, :after_normalize_filters,
+        :after_denormalize_filters
+
       self.maps = []
+      self.before_normalize_filters = []
+      self.before_denormalize_filters = []
+      self.after_normalize_filters = []
+      self.after_denormalize_filters = []
     end
   end
 
@@ -75,38 +82,40 @@ module HashMapper
   end
 
   def before_normalize(&blk)
-    @before_normalize = blk
+    self.before_normalize_filters = self.before_normalize_filters + [blk]
   end
 
   def before_denormalize(&blk)
-    @before_denormalize = blk
+    self.before_denormalize_filters = self.before_denormalize_filters + [blk]
   end
 
   def after_normalize(&blk)
-    @after_normalize = blk
+    self.after_normalize_filters = self.after_normalize_filters + [blk]
   end
 
   def after_denormalize(&blk)
-    @after_denormalize = blk
+    self.after_denormalize_filters = self.after_denormalize_filters + [blk]
   end
 
   protected
 
-
   def perform_hash_mapping(a_hash, meth)
     output = {}
-    # Before filter
-    before_filter = instance_eval "@before_#{meth}"
-    a_hash = before_filter.call(a_hash, output) if before_filter
+
+    # Before filters
+    a_hash = self.send(:"before_#{meth}_filters").inject(a_hash) do |memo, filter|
+      filter.call(memo, output)
+    end
+
     # Do the mapping
     self.maps.each do |m|
       m.process_into(output, a_hash, meth)
     end
-    # After filter
-    after_filter = instance_eval "@after_#{meth}"
-    output = after_filter.call(a_hash, output) if after_filter
-    # Return
-    output
+
+    # After filters
+    self.send(:"after_#{meth}_filters").inject(output) do |memo, filter|
+      filter.call(a_hash, memo)
+    end
   end
 
   # Contains PathMaps
