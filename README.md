@@ -286,6 +286,26 @@ Note also that 'output' is correct at the time of the filter, i.e. before_normal
 
 It is possible to define multiple filters of a given type. These are run in the order in which they are defined. A common use case might be to define a `before_normalize` filter in a parent class and a child class. The output from the previous invocation of the filter is passed as the input of the next invocation.
 
+You can pass one extra argument to before and after filters if you need to:
+```ruby
+class EggMapper
+  map from('/raw'), to('/fried')
+  
+  before_normalize do |input, output, opts|
+    input['raw'] ||= 'please' unless opts[:no_default] # this will give 'raw' a default value 
+    input
+  end
+  
+  after_denormalize do |input, output, opts|
+    output.to_a        # the denormalized object will now be an array, not a hash!!
+  end
+
+end
+
+EggMapper.normalize({}, no_default: true)
+EggMapper.denormalize({fried: 4})
+```
+
    
 ## REQUIREMENTS:
 
