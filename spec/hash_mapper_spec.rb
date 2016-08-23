@@ -563,3 +563,43 @@ describe 'multiple after filters' do
     end
   end
 end
+
+class WithOptions
+  extend HashMapper
+
+  before_normalize do |input, output, opts|
+    output[:bn] = opts[:bn] if opts[:bn]
+    input
+  end
+
+  after_normalize do |input, output, opts|
+    output[:an] = opts[:an] if opts[:an]
+    output
+  end
+
+  before_denormalize do |input, output, opts|
+    output[:bdn] = opts[:bdn] if opts[:bdn]
+    input
+  end
+
+  after_denormalize do |input, output, opts|
+    output[:adn] = opts[:adn] if opts[:adn]
+    output
+  end
+end
+
+describe 'with options' do
+  context 'when called with options' do
+    it 'passes the options to all the filters' do
+      WithOptions.normalize({}, bn: 1, an: 2).should == {bn: 1, an: 2}
+      WithOptions.denormalize({}, bdn: 1, adn: 2).should == {bdn: 1, adn: 2}
+    end
+  end
+
+  context 'when called without options' do
+    it 'stills work' do
+      WithOptions.normalize({}).should == {}
+      WithOptions.denormalize({}).should == {}
+    end
+  end
+end
