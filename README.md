@@ -97,7 +97,7 @@ You want to make sure an incoming value gets converted to a certain type, so
 
 gets translated to
 
-```ruby`
+```ruby
 {:one => 1, :two => 2}
 ```
 
