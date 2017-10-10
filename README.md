@@ -7,7 +7,7 @@
 ## DESCRIPTION:
 
 Maps values from hashes with different structures and/or key names. Ideal for normalizing arbitrary data to be consumed by your applications, or to prepare your data for different display formats (ie. json).
- 
+
 Tiny module that allows you to easily adapt from one hash structure to another with a simple declarative DSL.
 
 ## FEATURES/PROBLEMS:
@@ -61,7 +61,7 @@ You can use HashMapper in your own little hash-like objects:
 class NiceHash
   include Enumerable
   extend HashMapper
-  
+
   map from('/names/first'), to('/first_name')
   map from('/names/last'), to('/last_name')
 
@@ -89,7 +89,7 @@ end
 
 #### Coercing values
 
-You want to make sure an incoming value gets converted to a certain type, so 
+You want to make sure an incoming value gets converted to a certain type, so
 
 ```ruby
 {'one' => '1', 'two' => '2'}
@@ -152,6 +152,51 @@ map from('/names'), to('/user') do |names|
 end
 ```
 
+#### Keeping unmapped keys as is
+
+You want unmapped keys from the input to be transmitted to the output, use the `keep_unmapped_keys` option on the `normalize` or `denormalize` methods.
+
+Usage exemple:
+```ruby
+class ManyLevels
+  extend HashMapper
+  map from('/name'),            to('/tag_attributes/name')
+  map from('/properties/type'), to('/tag_attributes/type')
+  map from('/tagid'),           to('/tag_id')
+  map from('/properties/egg'),  to('/chicken')
+end
+
+input =   {
+{
+  :name => 'ismael',
+  :tag => ["Ruby"],
+  :tagid => 1,
+  :properties => {
+    :type => 'BLAH',
+    :egg => 33,
+    :thing => "thingy"
+  }
+}
+
+ManyLevels.normalize(input, keep_unmapped_keys: true)
+
+# outputs:
+  {
+    :tag_id => 1,
+    :tag => ["Ruby"],
+    :chicken => 33,
+    :properties => {
+      :thing => "thingy"
+    },
+    :tag_attributes => {
+      :name => 'ismael',
+      :type => 'BLAH'
+    }
+  }
+```
+
+Keys `:tag` and `:properties/:thing` are kept without even being declared in the Mapper.
+
 ### Mapping in reverse
 
 Cool, you can map one hash into another, but what if I want the opposite operation?
@@ -165,9 +210,9 @@ output = NameMapper.normalize(input) # => {:first_name => 'Mark', :last_name => 
 
 NameMapper.denormalize(output) # => input
 ```
-	
+
 This will work with your block filters and even nested mappers (see below).
-	
+
 ### Advanced usage
 #### Array access
 You want:
@@ -252,7 +297,7 @@ end
 
 But HashMapper's nested mappers will actually do that for you if a value is an array, so:
 
-```ruby	
+```ruby
 map from('/employees'),	to('employees'), using: UserMapper
 ```
 ... Will map each employee using UserMapper.
@@ -268,12 +313,12 @@ They all yield a block with 2 arguments - the hash you are mapping from and the 
 ```ruby
 class EggMapper
   map from('/raw'), to('/fried')
-  
+
   before_normalize do |input, output|
-    input['raw'] ||= 'please'     # this will give 'raw' a default value 
+    input['raw'] ||= 'please'     # this will give 'raw' a default value
     input
   end
-  
+
   after_denormalize do |input, output|
     output.to_a        # the denormalized object will now be an array, not a hash!!
   end
@@ -290,12 +335,12 @@ You can pass one extra argument to before and after filters if you need to:
 ```ruby
 class EggMapper
   map from('/raw'), to('/fried')
-  
+
   before_normalize do |input, output, opts|
-    input['raw'] ||= 'please' unless opts[:no_default] # this will give 'raw' a default value 
+    input['raw'] ||= 'please' unless opts[:no_default] # this will give 'raw' a default value
     input
   end
-  
+
   after_denormalize do |input, output, opts|
     output.to_a        # the denormalized object will now be an array, not a hash!!
   end
@@ -306,7 +351,7 @@ EggMapper.normalize({}, no_default: true)
 EggMapper.denormalize({fried: 4})
 ```
 
-   
+
 ## REQUIREMENTS:
 
 ## TODO:

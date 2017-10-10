@@ -1,4 +1,5 @@
 require 'hash_mapper/version'
+require 'ruby_dig'
 
 $:.unshift(File.dirname(__FILE__)) unless
 $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
@@ -7,6 +8,9 @@ def require_active_support
   require 'active_support/core_ext/array/extract_options'
   require 'active_support/core_ext/hash/indifferent_access'
   require 'active_support/core_ext/object/duplicable'
+  require 'active_support/core_ext/object/deep_dup'
+  require 'active_support/core_ext/object/blank'
+  require 'active_support/core_ext/hash/deep_merge'
   require 'active_support/core_ext/class/attribute'
 end
 
@@ -101,6 +105,7 @@ module HashMapper
 
   def perform_hash_mapping(a_hash, meth, opts)
     output = {}
+    a_hash = a_hash.deep_dup
 
     # Before filters
     a_hash = self.send(:"before_#{meth}_filters").inject(a_hash) do |memo, filter|
@@ -109,13 +114,41 @@ module HashMapper
 
     # Do the mapping
     self.maps.each do |m|
-      m.process_into(output, a_hash, meth)
+      m.process_into(output, a_hash, meth, opts)
     end
 
     # After filters
-    self.send(:"after_#{meth}_filters").inject(output) do |memo, filter|
+    output = self.send(:"after_#{meth}_filters").inject(output) do |memo, filter|
       filter.call(a_hash, memo, opts)
     end
+
+    output = merge_hashes(output, a_hash, meth) if opts[:keep_unmapped_keys]
+
+    output
+  end
+
+  def merge_hashes(output, dupped_hash, meth)
+    clean_dup(dupped_hash, meth).deep_merge(output)
+  end
+
+  def clean_dup(dupped_hash, meth)
+    self.maps.each do |m|
+      segments = meth == :normalize ? m.path_from.segments.dup : m.path_to.segments.dup
+      key = segments.pop
+      digged_hash(dupped_hash, segments).delete(key)
+    end
+    clean(dupped_hash)
+  end
+
+  def clean(hash)
+    return unless hash.is_a?(Hash)
+    hash.keys.each { |k| clean(hash[k]) }
+    hash.delete_if { |_, v| v.blank? }
+  end
+
+  def digged_hash(hash, segments)
+    return hash if segments.empty?
+    hash.dig(*segments) || {}
   end
 
   # Contains PathMaps
@@ -132,14 +165,14 @@ module HashMapper
       @default_value = options.fetch(:default, :hash_mapper_no_default)
     end
 
-    def process_into(output, input, meth = :normalize)
+    def process_into(output, input, meth = :normalize, opts)
       path_1, path_2 = (meth == :normalize ? [path_from, path_to] : [path_to, path_from])
-      value = get_value_from_input(output, input, path_1, meth)
+      value = get_value_from_input(output, input, path_1, meth, opts)
       set_value_in_output(output, path_2, value)
     end
     protected
 
-    def get_value_from_input(output, input, path, meth)
+    def get_value_from_input(output, input, path, meth, opts)
       value = path.inject(input) do |h,e|
         if h.is_a?(Hash)
           v = [h[e.to_sym], h[e.to_s]].compact.first
@@ -149,7 +182,7 @@ module HashMapper
         return :hash_mapper_no_value if v.nil?
         v
       end
-      delegated_mapper ? delegate_to_nested_mapper(value, meth) : value
+      delegated_mapper ? delegate_to_nested_mapper(value, meth, opts) : value
     end
 
     def set_value_in_output(output, path, value)
@@ -163,14 +196,14 @@ module HashMapper
       add_value_to_hash!(output, path, value)
     end
 
-    def delegate_to_nested_mapper(value, meth)
+    def delegate_to_nested_mapper(value, meth, opts)
       case value
       when Array
-        value.map {|h| delegated_mapper.send(meth, h)}
+        value.map {|h| delegated_mapper.send(meth, h, opts)}
       when nil
         return :hash_mapper_no_value
       else
-        delegated_mapper.send(meth, value)
+        delegated_mapper.send(meth, value, opts)
       end
     end
 
@@ -190,9 +223,7 @@ module HashMapper
           end
         end
       end
-
     end
-
   end
 
   # contains array of path segments
@@ -246,7 +277,5 @@ module HashMapper
       end.flatten
       segments
     end
-
   end
-
 end

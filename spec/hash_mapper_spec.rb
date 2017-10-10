@@ -6,24 +6,24 @@ class OneLevel
 end
 
 describe 'mapping a hash with one level' do
-  
+
   before :each do
     @from = {:name => 'ismael'}
     @to   = {:nombre => 'ismael'}
   end
-  
+
   it "should map to" do
     OneLevel.normalize(@from).should == @to
   end
-  
+
   it "should have indifferent access" do
     OneLevel.normalize({'name' => 'ismael'}).should == @to
   end
-  
+
   it "should map back the other way" do
     OneLevel.denormalize(@to).should == @from
   end
-  
+
 end
 
 class ManyLevels
@@ -32,10 +32,11 @@ class ManyLevels
   map from('/properties/type'), to('/tag_attributes/type')
   map from('/tagid'),           to('/tag_id')
   map from('/properties/egg'),  to('/chicken')
+  map from('/properties/others/things'), to('/properties/others_things')
 end
 
 describe 'mapping from one nested hash to another' do
-  
+
   before :each do
     @from = {
       :name => 'ismael',
@@ -45,7 +46,7 @@ describe 'mapping from one nested hash to another' do
         :egg => 33
       }
     }
-    
+
     @to   = {
       :tag_id => 1,
       :chicken => 33,
@@ -55,47 +56,15 @@ describe 'mapping from one nested hash to another' do
       }
     }
   end
-  
+
   it "should map from and to different depths" do
     ManyLevels.normalize(@from).should == @to
   end
-  
+
   it "should map back the other way" do
     ManyLevels.denormalize(@to).should == @from
   end
-  
 end
-
-class DifferentTypes
-  extend HashMapper
-  map from('/strings/a',  &:to_s),      to('/integers/a', &:to_i)
-  map from('/integers/b', &:to_i),     to('/strings/b',   &:to_s)
-end
-
-describe 'coercing types' do
-  
-  before :each do
-    @from = {
-      :strings => {:a => '10'},
-      :integers =>{:b => 20}
-    }
-    
-    @to   = {
-      :integers => {:a => 10},
-      :strings  => {:b => '20'}
-    }
-  end
-  
-  it "should coerce values to specified types" do
-    DifferentTypes.normalize(@from).should == @to
-  end
-  
-  it "should coerce the other way if specified" do
-    DifferentTypes.denormalize(@to).should == @from
-  end
-  
-end
-
 
 describe 'arrays in hashes' do
   before :each do
@@ -107,7 +76,7 @@ describe 'arrays in hashes' do
         :egg => 33
       }
     }
-    
+
     @to   = {
       :tag_id => 1,
       :chicken => 33,
@@ -117,11 +86,88 @@ describe 'arrays in hashes' do
       }
     }
   end
-  
+
   it "should map array values as normal" do
     ManyLevels.normalize(@from).should == @to
   end
 end
+
+describe "hash with not mapped attributes" do
+  before :each do
+    @from = {
+              :name => 'ismael',
+              :title => ["Ruby"],
+              :test => "coin",
+              :tagid => 1,
+              :properties => {
+                :type => 'BLAH',
+                :egg => 33,
+                :thing => "plop",
+                others: {
+                  things: "something"
+                }
+              }
+            }
+
+    @to = {
+            :tag_id => 1,
+            :title => ["Ruby"],
+            :test => "coin",
+            :chicken => 33,
+            :properties => {
+              :thing => "plop",
+              others_things: "something"
+            },
+            :tag_attributes => {
+              :name => 'ismael',
+              :type => 'BLAH'
+            }
+          }
+  end
+
+  context "when normalizing" do
+    it "keeps them" do
+      ManyLevels.normalize(@from, keep_unmapped_keys: true).should == @to
+    end
+  end
+
+  context "when denormalizing" do
+    it "should map back the other way" do
+      ManyLevels.denormalize(@to, keep_unmapped_keys: true).should == @from
+    end
+  end
+end
+
+class DifferentTypes
+  extend HashMapper
+  map from('/strings/a',  &:to_s),      to('/integers/a', &:to_i)
+  map from('/integers/b', &:to_i),     to('/strings/b',   &:to_s)
+end
+
+describe 'coercing types' do
+
+  before :each do
+    @from = {
+      :strings => {:a => '10'},
+      :integers =>{:b => 20}
+    }
+
+    @to   = {
+      :integers => {:a => 10},
+      :strings  => {:b => '20'}
+    }
+  end
+
+  it "should coerce values to specified types" do
+    DifferentTypes.normalize(@from).should == @to
+  end
+
+  it "should coerce the other way if specified" do
+    DifferentTypes.denormalize(@to).should == @from
+  end
+
+end
+
 
 class WithArrays
   extend HashMapper
@@ -129,7 +175,7 @@ class WithArrays
   map from('/arrays/names[1]'),      to('/last_name')
   map from('/arrays/company'),       to('/work/company')
 end
- 
+
 describe "array indexes" do
   before :each do
     @from = {
@@ -144,11 +190,11 @@ describe "array indexes" do
       :work       => {:company => 'New Bamboo'}
     }
   end
-  
+
   it "should extract defined array values" do
     WithArrays.normalize(@from).should == @to
   end
-  
+
   it "should map the other way restoring arrays" do
     WithArrays.denormalize(@to).should == @from
   end
@@ -156,9 +202,6 @@ end
 
 class PersonWithBlock
   extend HashMapper
-  def self.normalize(h)
-    super
-  end
   map from('/names/first'){|n| n.gsub('+','')}, to('/first_name'){|n| "+++#{n}+++"}
 end
 class PersonWithBlockOneWay
@@ -175,24 +218,24 @@ describe "with blocks filters" do
       :first_name => '+++Ismael+++'
     }
   end
-  
+
   it "should pass final value through given block" do
     PersonWithBlock.normalize(@from).should == @to
   end
-  
+
   it "should be able to map the other way using a block" do
     PersonWithBlock.denormalize(@to).should == @from
   end
-  
+
   it "should accept a block for just one direction" do
     PersonWithBlockOneWay.normalize(@from).should == @to
   end
-  
+
 end
 
 class ProjectMapper
   extend HashMapper
-  
+
   map from('/name'),        to('/project_name')
   map from('/author_hash'), to('/author'), using(PersonWithBlock)
 end
@@ -210,20 +253,45 @@ describe "with nested mapper" do
       :author => {:first_name => '+++Ismael+++'}
     }
   end
-  
+
   it "should delegate nested hashes to another mapper" do
     ProjectMapper.normalize(@from).should == @to
   end
-  
+
   it "should translate the other way using nested hashes" do
     ProjectMapper.denormalize(@to).should == @from
   end
-  
+end
+
+describe "with nested mapper and options" do
+  before :each do
+    @from ={
+      :name => 'HashMapper',
+      :author_hash => {
+        :names => {:id => 12, :first => 'Ismael'}
+      }
+    }
+    @to = {
+      :project_name => 'HashMapper',
+      :author => {
+        names: { :id => 12 },
+        :first_name => '+++Ismael+++'
+      }
+    }
+  end
+
+  it "should delegate nested hashes to another mapper" do
+    ProjectMapper.normalize(@from, keep_unmapped_keys: true).should == @to
+  end
+
+  it "should translate the other way using nested hashes" do
+    ProjectMapper.denormalize(@to, keep_unmapped_keys: true).should == @from
+  end
 end
 
 class CompanyMapper
   extend HashMapper
-  
+
   map from('/name'),      to('/company_name')
   map from('/employees'), to('/employees') do |employees_array|
     employees_array.collect{|emp_hash| PersonWithBlock.normalize(emp_hash)}
@@ -232,7 +300,7 @@ end
 
 class CompanyEmployeesMapper
   extend HashMapper
-  
+
   map from('/name'),      to('/company_name')
   map from('/employees'), to('/employees'), using(PersonWithBlock)
 end
@@ -256,11 +324,11 @@ describe "with arrays of nested hashes" do
       ]
     }
   end
-  
+
   it "should pass array value though given block mapper" do
     CompanyMapper.normalize(@from).should == @to
   end
-  
+
   it "should map array elements automatically" do
     CompanyEmployeesMapper.normalize(@from).should == @to
   end
@@ -268,11 +336,11 @@ end
 
 class NoKeys
   extend HashMapper
-  
+
   map from('/exists'), to('/exists_yahoo') #in
   map from('/exists_as_nil'), to('/exists_nil') #in
   map from('/foo'), to('/bar') # not in
-  
+
 end
 
 describe "with non-matching maps" do
@@ -286,28 +354,28 @@ describe "with non-matching maps" do
       :exists_yahoo => 1
     }
   end
-  
+
   it "should ignore maps that don't exist" do
     NoKeys.normalize(@input).should == @output
   end
 end
 
 describe "with false values" do
-  
+
   it "should include values in output" do
     NoKeys.normalize({'exists' => false}).should == {:exists_yahoo => false}
     NoKeys.normalize({:exists => false}).should == {:exists_yahoo => false}
   end
-  
+
 end
 
 describe "with nil values" do
-  
+
   it "should not include values in output" do
     NoKeys.normalize({:exists => nil}).should == {}
     NoKeys.normalize({'exists' => nil}).should == {}
   end
-  
+
 end
 
 class WithBeforeFilters
@@ -390,11 +458,11 @@ describe "inherited mappers" do
     }
 
   end
-  
+
   it "should inherit mappings" do
     B.normalize(@from).should == @to_b
   end
-  
+
   it "should not affect other mappers" do
     NotRelated.normalize('n' => 'nn').should == {:n => {:n => 'nn'}}
   end
@@ -407,7 +475,7 @@ class MixedMappings
 end
 
 describe "dealing with strings and symbols" do
-  
+
   it "should be able to normalize from a nested hash with string keys" do
     MixedMappings.normalize(
       'big' => {'jobs' => 5},
@@ -415,7 +483,7 @@ describe "dealing with strings and symbols" do
     ).should ==   {:dodo  => 5,
                    :bingo => {:biscuit => 3.2}}
   end
-  
+
   it "should not symbolized keys in value hashes" do
     MixedMappings.normalize(
       'big' => {'jobs' => 5},
@@ -423,7 +491,7 @@ describe "dealing with strings and symbols" do
     ).should ==   {:dodo  => 5,
                    :bingo => {:biscuit => {'string key' => 'value'}}}
   end
-  
+
 end
 
 class DefaultValues
