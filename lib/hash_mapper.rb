@@ -39,6 +39,7 @@ unless [].respond_to?(:inject_with_index)
 end
 
 module HashMapper
+  DEFAULT_OPTIONS = {}.freeze
 
   def self.extended(base)
     base.class_eval do
@@ -73,11 +74,11 @@ module HashMapper
     { using: mapper_class }
   end
 
-  def normalize(a_hash, options: {})
+  def normalize(a_hash, options: DEFAULT_OPTIONS)
     perform_hash_mapping a_hash, :normalize, options
   end
 
-  def denormalize(a_hash, options: {})
+  def denormalize(a_hash, options: DEFAULT_OPTIONS)
     perform_hash_mapping a_hash, :denormalize, options
   end
 
