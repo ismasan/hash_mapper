@@ -74,12 +74,12 @@ module HashMapper
     { using: mapper_class }
   end
 
-  def normalize(a_hash, options: DEFAULT_OPTIONS)
-    perform_hash_mapping a_hash, :normalize, options
+  def normalize(a_hash, options: DEFAULT_OPTIONS, context: nil)
+    perform_hash_mapping a_hash, :normalize, options: options
   end
 
-  def denormalize(a_hash, options: DEFAULT_OPTIONS)
-    perform_hash_mapping a_hash, :denormalize, options
+  def denormalize(a_hash, options: DEFAULT_OPTIONS, context: nil)
+    perform_hash_mapping a_hash, :denormalize, options: options
   end
 
   def before_normalize(&blk)
@@ -100,12 +100,12 @@ module HashMapper
 
   protected
 
-  def perform_hash_mapping(a_hash, meth, opts)
+  def perform_hash_mapping(a_hash, meth, options:)
     output = {}
 
     # Before filters
     a_hash = self.send(:"before_#{meth}_filters").inject(a_hash) do |memo, filter|
-      filter.call(memo, output, opts)
+      filter.call(memo, output, options)
     end
 
     # Do the mapping
@@ -115,7 +115,7 @@ module HashMapper
 
     # After filters
     self.send(:"after_#{meth}_filters").inject(output) do |memo, filter|
-      filter.call(a_hash, memo, opts)
+      filter.call(a_hash, memo, options)
     end
   end
 
