@@ -601,3 +601,30 @@ describe 'with options' do
     end
   end
 end
+
+describe 'passing custom context object' do
+  it 'passes context object down to sub-mappers' do
+    friend_mapper = Class.new do
+      extend HashMapper
+
+      map from('/name'), to('/name')
+
+      def normalize(input, context: , **kargs)
+        context[:names] ||= []
+        context[:names] << input[:name]
+        self.class.normalize(input, context: context, **kargs)
+      end
+    end
+
+    mapper = Class.new do
+      extend HashMapper
+
+      map from('/friends'), to('/friends'), using: friend_mapper.new
+    end
+
+    input = {friends: [{name: 'Ismael', last_name: 'Celis'}, {name: 'Joe'}]}
+    ctx = {}
+    mapper.normalize(input, context: ctx)
+    expect(ctx[:names]).to eq(%w(Ismael Joe))
+  end
+end
