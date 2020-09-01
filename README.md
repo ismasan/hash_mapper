@@ -302,7 +302,7 @@ class EggMapper
 
 end
 
-EggMapper.normalize({}, no_default: true)
+EggMapper.normalize({}, options: { no_default: true })
 EggMapper.denormalize({fried: 4})
 ```
 

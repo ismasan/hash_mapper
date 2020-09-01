@@ -589,8 +589,8 @@ end
 describe 'with options' do
   context 'when called with options' do
     it 'passes the options to all the filters' do
-      expect(WithOptions.normalize({}, bn: 1, an: 2)).to eq({bn: 1, an: 2})
-      expect(WithOptions.denormalize({}, bdn: 1, adn: 2)).to eq({bdn: 1, adn: 2})
+      expect(WithOptions.normalize({}, options: { bn: 1, an: 2 })).to eq({bn: 1, an: 2})
+      expect(WithOptions.denormalize({}, options: { bdn: 1, adn: 2 })).to eq({bdn: 1, adn: 2})
     end
   end
 
@@ -599,5 +599,32 @@ describe 'with options' do
       expect(WithOptions.normalize({})).to eq({})
       expect(WithOptions.denormalize({})).to eq({})
     end
+  end
+end
+
+describe 'passing custom context object' do
+  it 'passes context object down to sub-mappers' do
+    friend_mapper = Class.new do
+      extend HashMapper
+
+      map from('/name'), to('/name')
+
+      def normalize(input, context: , **kargs)
+        context[:names] ||= []
+        context[:names] << input[:name]
+        self.class.normalize(input, context: context, **kargs)
+      end
+    end
+
+    mapper = Class.new do
+      extend HashMapper
+
+      map from('/friends'), to('/friends'), using: friend_mapper.new
+    end
+
+    input = {friends: [{name: 'Ismael', last_name: 'Celis'}, {name: 'Joe'}]}
+    ctx = {}
+    mapper.normalize(input, context: ctx)
+    expect(ctx[:names]).to eq(%w(Ismael Joe))
   end
 end

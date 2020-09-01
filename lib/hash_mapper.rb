@@ -39,6 +39,7 @@ unless [].respond_to?(:inject_with_index)
 end
 
 module HashMapper
+  DEFAULT_OPTIONS = {}.freeze
 
   def self.extended(base)
     base.class_eval do
@@ -73,12 +74,12 @@ module HashMapper
     { using: mapper_class }
   end
 
-  def normalize(a_hash, opts = {})
-    perform_hash_mapping a_hash, :normalize, opts
+  def normalize(a_hash, options: DEFAULT_OPTIONS, context: nil)
+    perform_hash_mapping a_hash, :normalize, options: options, context: context
   end
 
-  def denormalize(a_hash, opts = {})
-    perform_hash_mapping a_hash, :denormalize, opts
+  def denormalize(a_hash, options: DEFAULT_OPTIONS, context: nil)
+    perform_hash_mapping a_hash, :denormalize, options: options, context: context
   end
 
   def before_normalize(&blk)
@@ -99,22 +100,22 @@ module HashMapper
 
   protected
 
-  def perform_hash_mapping(a_hash, meth, opts)
+  def perform_hash_mapping(a_hash, meth, options:, context:)
     output = {}
 
     # Before filters
     a_hash = self.send(:"before_#{meth}_filters").inject(a_hash) do |memo, filter|
-      filter.call(memo, output, opts)
+      filter.call(memo, output, options)
     end
 
     # Do the mapping
     self.maps.each do |m|
-      m.process_into(output, a_hash, meth)
+      m.process_into(output, a_hash, method_name: meth, context: context)
     end
 
     # After filters
     self.send(:"after_#{meth}_filters").inject(output) do |memo, filter|
-      filter.call(a_hash, memo, opts)
+      filter.call(a_hash, memo, options)
     end
   end
 
@@ -132,14 +133,14 @@ module HashMapper
       @default_value = options.fetch(:default, :hash_mapper_no_default)
     end
 
-    def process_into(output, input, meth = :normalize)
-      path_1, path_2 = (meth == :normalize ? [path_from, path_to] : [path_to, path_from])
-      value = get_value_from_input(output, input, path_1, meth)
+    def process_into(output, input, method_name: :normalize, context: nil)
+      path_1, path_2 = (method_name == :normalize ? [path_from, path_to] : [path_to, path_from])
+      value = get_value_from_input(output, input, path_1, method_name: method_name, context: context)
       set_value_in_output(output, path_2, value)
     end
     protected
 
-    def get_value_from_input(output, input, path, meth)
+    def get_value_from_input(output, input, path, method_name:, context:)
       value = path.inject(input) do |h,e|
         if h.is_a?(Hash)
           v = [h[e.to_sym], h[e.to_s]].compact.first
@@ -149,7 +150,7 @@ module HashMapper
         return :hash_mapper_no_value if v.nil?
         v
       end
-      delegated_mapper ? delegate_to_nested_mapper(value, meth) : value
+      delegated_mapper ? delegate_to_nested_mapper(value, method_name, context: context) : value
     end
 
     def set_value_in_output(output, path, value)
@@ -163,14 +164,14 @@ module HashMapper
       add_value_to_hash!(output, path, value)
     end
 
-    def delegate_to_nested_mapper(value, meth)
+    def delegate_to_nested_mapper(value, method_name, context:)
       case value
       when Array
-        value.map {|h| delegated_mapper.send(meth, h)}
+        value.map {|v| delegated_mapper.public_send(method_name, v, context: context)}
       when nil
         return :hash_mapper_no_value
       else
-        delegated_mapper.send(meth, value)
+        delegated_mapper.public_send(method_name, value, context: context)
       end
     end
 
