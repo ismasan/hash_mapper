@@ -9,7 +9,7 @@ RSpec.configure do |config|
   config.filter_run focus: true
 
   config.expect_with :rspec do |c|
-    c.syntax = :should
+    c.syntax = :expect
   end
 end
 

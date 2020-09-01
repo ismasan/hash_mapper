@@ -13,15 +13,15 @@ describe 'mapping a hash with one level' do
   end
 
   it "should map to" do
-    OneLevel.normalize(@from).should == @to
+    expect(OneLevel.normalize(@from)).to eq(@to)
   end
 
   it "should have indifferent access" do
-    OneLevel.normalize({'name' => 'ismael'}).should == @to
+    expect(OneLevel.normalize({'name' => 'ismael'})).to eq(@to)
   end
 
   it "should map back the other way" do
-    OneLevel.denormalize(@to).should == @from
+    expect(OneLevel.denormalize(@to)).to eq(@from)
   end
 
 end
@@ -57,11 +57,11 @@ describe 'mapping from one nested hash to another' do
   end
 
   it "should map from and to different depths" do
-    ManyLevels.normalize(@from).should == @to
+    expect(ManyLevels.normalize(@from)).to eq(@to)
   end
 
   it "should map back the other way" do
-    ManyLevels.denormalize(@to).should == @from
+    expect(ManyLevels.denormalize(@to)).to eq(@from)
   end
 
 end
@@ -87,11 +87,11 @@ describe 'coercing types' do
   end
 
   it "should coerce values to specified types" do
-    DifferentTypes.normalize(@from).should == @to
+    expect(DifferentTypes.normalize(@from)).to eq(@to)
   end
 
   it "should coerce the other way if specified" do
-    DifferentTypes.denormalize(@to).should == @from
+    expect(DifferentTypes.denormalize(@to)).to eq(@from)
   end
 
 end
@@ -119,7 +119,7 @@ describe 'arrays in hashes' do
   end
 
   it "should map array values as normal" do
-    ManyLevels.normalize(@from).should == @to
+    expect(ManyLevels.normalize(@from)).to eq(@to)
   end
 end
 
@@ -146,11 +146,11 @@ describe "array indexes" do
   end
 
   it "should extract defined array values" do
-    WithArrays.normalize(@from).should == @to
+    expect(WithArrays.normalize(@from)).to eq(@to)
   end
 
   it "should map the other way restoring arrays" do
-    WithArrays.denormalize(@to).should == @from
+    expect(WithArrays.denormalize(@to)).to eq(@from)
   end
 end
 
@@ -177,15 +177,15 @@ describe "with blocks filters" do
   end
 
   it "should pass final value through given block" do
-    PersonWithBlock.normalize(@from).should == @to
+    expect(PersonWithBlock.normalize(@from)).to eq(@to)
   end
 
   it "should be able to map the other way using a block" do
-    PersonWithBlock.denormalize(@to).should == @from
+    expect(PersonWithBlock.denormalize(@to)).to eq(@from)
   end
 
   it "should accept a block for just one direction" do
-    PersonWithBlockOneWay.normalize(@from).should == @to
+    expect(PersonWithBlockOneWay.normalize(@from)).to eq(@to)
   end
 
 end
@@ -194,7 +194,7 @@ class ProjectMapper
   extend HashMapper
 
   map from('/name'),        to('/project_name')
-  map from('/author_hash'), to('/author'), using(PersonWithBlock)
+  map from('/author_hash'), to('/author'), using: PersonWithBlock
 end
 
 describe "with nested mapper" do
@@ -212,11 +212,11 @@ describe "with nested mapper" do
   end
 
   it "should delegate nested hashes to another mapper" do
-    ProjectMapper.normalize(@from).should == @to
+    expect(ProjectMapper.normalize(@from)).to eq(@to)
   end
 
   it "should translate the other way using nested hashes" do
-    ProjectMapper.denormalize(@to).should == @from
+    expect(ProjectMapper.denormalize(@to)).to eq(@from)
   end
 
 end
@@ -234,7 +234,7 @@ class CompanyEmployeesMapper
   extend HashMapper
 
   map from('/name'),      to('/company_name')
-  map from('/employees'), to('/employees'), using(PersonWithBlock)
+  map from('/employees'), to('/employees'), using: PersonWithBlock
 end
 
 describe "with arrays of nested hashes" do
@@ -258,11 +258,11 @@ describe "with arrays of nested hashes" do
   end
 
   it "should pass array value though given block mapper" do
-    CompanyMapper.normalize(@from).should == @to
+    expect(CompanyMapper.normalize(@from)).to eq(@to)
   end
 
   it "should map array elements automatically" do
-    CompanyEmployeesMapper.normalize(@from).should == @to
+    expect(CompanyEmployeesMapper.normalize(@from)).to eq(@to)
   end
 end
 
@@ -288,15 +288,15 @@ describe "with non-matching maps" do
   end
 
   it "should ignore maps that don't exist" do
-    NoKeys.normalize(@input).should == @output
+    expect(NoKeys.normalize(@input)).to eq(@output)
   end
 end
 
 describe "with false values" do
 
   it "should include values in output" do
-    NoKeys.normalize({'exists' => false}).should == {:exists_yahoo => false}
-    NoKeys.normalize({:exists => false}).should == {:exists_yahoo => false}
+    expect(NoKeys.normalize({'exists' => false})).to eq({:exists_yahoo => false})
+    expect(NoKeys.normalize({:exists => false})).to eq({:exists_yahoo => false})
   end
 
 end
@@ -304,8 +304,8 @@ end
 describe "with nil values" do
 
   it "should not include values in output" do
-    NoKeys.normalize({:exists => nil}).should == {}
-    NoKeys.normalize({'exists' => nil}).should == {}
+    expect(NoKeys.normalize({:exists => nil})).to eq({})
+    expect(NoKeys.normalize({'exists' => nil})).to eq({})
   end
 
 end
@@ -345,16 +345,16 @@ describe "before and after filters" do
     @norm   = {:goodbye => 'seeya later!'}
   end
   it "should allow filtering before normalize" do
-    WithBeforeFilters.normalize(@denorm).should == {:goodbye => 'wassup?!', :extra => 'extra wassup?! innit'}
+    expect(WithBeforeFilters.normalize(@denorm)).to eq({:goodbye => 'wassup?!', :extra => 'extra wassup?! innit'})
   end
   it "should allow filtering before denormalize" do
-    WithBeforeFilters.denormalize(@norm).should == {:hello => 'changed'}
+    expect(WithBeforeFilters.denormalize(@norm)).to eq({:hello => 'changed'})
   end
   it "should allow filtering after normalize" do
-    WithAfterFilters.normalize(@denorm).should == [[:goodbye, 'wassup?!']]
+    expect(WithAfterFilters.normalize(@denorm)).to eq([[:goodbye, 'wassup?!']])
   end
   it "should allow filtering after denormalize" do
-    WithAfterFilters.denormalize(@norm).should == {}
+    expect(WithAfterFilters.denormalize(@norm)).to eq({})
   end
 
 end
@@ -392,11 +392,11 @@ describe "inherited mappers" do
   end
 
   it "should inherit mappings" do
-    B.normalize(@from).should == @to_b
+    expect(B.normalize(@from)).to eq(@to_b)
   end
 
   it "should not affect other mappers" do
-    NotRelated.normalize('n' => 'nn').should == {:n => {:n => 'nn'}}
+    expect(NotRelated.normalize('n' => 'nn')).to eq({:n => {:n => 'nn'}})
   end
 end
 
@@ -409,19 +409,19 @@ end
 describe "dealing with strings and symbols" do
 
   it "should be able to normalize from a nested hash with string keys" do
-    MixedMappings.normalize(
+    expect(MixedMappings.normalize(
       'big' => {'jobs' => 5},
       'timble' => 3.2
-    ).should ==   {:dodo  => 5,
-                   :bingo => {:biscuit => 3.2}}
+    )).to eq({:dodo  => 5,
+                   :bingo => {:biscuit => 3.2}})
   end
 
   it "should not symbolized keys in value hashes" do
-    MixedMappings.normalize(
+    expect(MixedMappings.normalize(
       'big' => {'jobs' => 5},
       'timble' => {'string key' => 'value'}
-    ).should ==   {:dodo  => 5,
-                   :bingo => {:biscuit => {'string key' => 'value'}}}
+    )).to eq({:dodo  => 5,
+                   :bingo => {:biscuit => {'string key' => 'value'}}})
   end
 
 end
@@ -435,16 +435,16 @@ end
 
 describe "default values" do
   it "should use a default value whenever a key is not set" do
-    DefaultValues.normalize(
+    expect(DefaultValues.normalize(
       'without_default' => 'some_value'
-    ).should == { not_defaulted: 'some_value', defaulted: 'the_default_value' }
+    )).to eq({ not_defaulted: 'some_value', defaulted: 'the_default_value' })
   end
 
   it "should not use a default if a key is set (even if the value is falsy)" do
-    DefaultValues.normalize({
+    expect(DefaultValues.normalize({
         'without_default' => 'some_value',
         'with_default' => false
-      }).should == { not_defaulted: 'some_value', defaulted: false }
+      })).to eq({ not_defaulted: 'some_value', defaulted: false })
   end
 end
 
@@ -488,20 +488,20 @@ end
 
 describe 'multiple before filters' do
   it 'runs before_normalize filters in the order they are defined' do
-    MultiBeforeFilter.normalize({ foo: 'X' }).should == { bar: 'XYZ' }
+    expect(MultiBeforeFilter.normalize({ foo: 'X' })).to eq({ bar: 'XYZ' })
   end
 
   it 'runs before_denormalize filters in the order they are defined' do
-    MultiBeforeFilter.denormalize({ bar: 'X' }).should == { foo: 'BAX' }
+    expect(MultiBeforeFilter.denormalize({ bar: 'X' })).to eq({ foo: 'BAX' })
   end
 
   context 'when the filters are spread across classes' do
     it 'runs before_normalize filters in the order they are defined' do
-      MultiBeforeFilterSubclass.normalize({ foo: 'X' }).should == { bar: 'XYZ!' }
+      expect(MultiBeforeFilterSubclass.normalize({ foo: 'X' })).to eq({ bar: 'XYZ!' })
     end
 
     it 'runs before_denormalize filters in the order they are defined' do
-      MultiBeforeFilterSubclass.denormalize({ bar: 'X' }).should == { foo: 'CBAX' }
+      expect(MultiBeforeFilterSubclass.denormalize({ bar: 'X' })).to eq({ foo: 'CBAX' })
     end
   end
 end
@@ -546,20 +546,20 @@ end
 
 describe 'multiple after filters' do
   it 'runs after_normalize filters in the order they are defined' do
-    MultiAfterFilter.normalize({ baz: '0' }).should == { bat: '012' }
+    expect(MultiAfterFilter.normalize({ baz: '0' })).to eq({ bat: '012' })
   end
 
   it 'runs after_denormalize filters in the order they are defined' do
-    MultiAfterFilter.denormalize({ bat: '0' }).should == { baz: '890' }
+    expect(MultiAfterFilter.denormalize({ bat: '0' })).to eq({ baz: '890' })
   end
 
   context 'when the filters are spread across classes' do
     it 'runs after_normalize filters in the order they are defined' do
-      MultiAfterFilterSubclass.normalize({ baz: '0' }).should == { bat: '0123' }
+      expect(MultiAfterFilterSubclass.normalize({ baz: '0' })).to eq({ bat: '0123' })
     end
 
     it 'runs after_denormalize filters in the order they are defined' do
-      MultiAfterFilterSubclass.denormalize({ bat: '0' }).should == { baz: '7890' }
+      expect(MultiAfterFilterSubclass.denormalize({ bat: '0' })).to eq({ baz: '7890' })
     end
   end
 end
@@ -591,15 +591,15 @@ end
 describe 'with options' do
   context 'when called with options' do
     it 'passes the options to all the filters' do
-      WithOptions.normalize({}, bn: 1, an: 2).should == {bn: 1, an: 2}
-      WithOptions.denormalize({}, bdn: 1, adn: 2).should == {bdn: 1, adn: 2}
+      expect(WithOptions.normalize({}, bn: 1, an: 2)).to eq({bn: 1, an: 2})
+      expect(WithOptions.denormalize({}, bdn: 1, adn: 2)).to eq({bdn: 1, adn: 2})
     end
   end
 
   context 'when called without options' do
     it 'stills work' do
-      WithOptions.normalize({}).should == {}
-      WithOptions.denormalize({}).should == {}
+      expect(WithOptions.normalize({})).to eq({})
+      expect(WithOptions.denormalize({})).to eq({})
     end
   end
 end

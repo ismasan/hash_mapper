@@ -25,6 +25,6 @@ Gem::Specification.new do |s|
   end
 
   # specify any dependencies here; for example:
-  s.add_development_dependency 'rspec', '2.14'
+  s.add_development_dependency 'rspec', '>= 3.9'
   s.add_development_dependency 'rake'
 end
