@@ -73,12 +73,12 @@ module HashMapper
     { using: mapper_class }
   end
 
-  def normalize(a_hash, opts = {})
-    perform_hash_mapping a_hash, :normalize, opts
+  def normalize(a_hash, options: {})
+    perform_hash_mapping a_hash, :normalize, options
   end
 
-  def denormalize(a_hash, opts = {})
-    perform_hash_mapping a_hash, :denormalize, opts
+  def denormalize(a_hash, options: {})
+    perform_hash_mapping a_hash, :denormalize, options
   end
 
   def before_normalize(&blk)

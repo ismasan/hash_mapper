@@ -589,8 +589,8 @@ end
 describe 'with options' do
   context 'when called with options' do
     it 'passes the options to all the filters' do
-      expect(WithOptions.normalize({}, bn: 1, an: 2)).to eq({bn: 1, an: 2})
-      expect(WithOptions.denormalize({}, bdn: 1, adn: 2)).to eq({bdn: 1, adn: 2})
+      expect(WithOptions.normalize({}, options: { bn: 1, an: 2 })).to eq({bn: 1, an: 2})
+      expect(WithOptions.denormalize({}, options: { bdn: 1, adn: 2 })).to eq({bdn: 1, adn: 2})
     end
   end
 
