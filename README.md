@@ -290,12 +290,12 @@ You can pass one extra argument to before and after filters if you need to:
 ```ruby
 class EggMapper
   map from('/raw'), to('/fried')
-  
+
   before_normalize do |input, output, opts|
-    input['raw'] ||= 'please' unless opts[:no_default] # this will give 'raw' a default value 
+    input['raw'] ||= 'please' unless opts[:no_default] # this will give 'raw' a default value
     input
   end
-  
+
   after_denormalize do |input, output, opts|
     output.to_a        # the denormalized object will now be an array, not a hash!!
   end
@@ -306,7 +306,7 @@ EggMapper.normalize({}, no_default: true)
 EggMapper.denormalize({fried: 4})
 ```
 
-   
+
 ## REQUIREMENTS:
 
 ## TODO:
