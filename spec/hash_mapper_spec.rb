@@ -8,8 +8,8 @@ end
 describe 'mapping a hash with one level' do
 
   before :each do
-    @from = {:name => 'ismael'}
-    @to   = {:nombre => 'ismael'}
+    @from = {name: 'ismael'}
+    @to   = {nombre: 'ismael'}
   end
 
   it "should map to" do
@@ -38,20 +38,20 @@ describe 'mapping from one nested hash to another' do
 
   before :each do
     @from = {
-      :name => 'ismael',
-      :tagid => 1,
-      :properties => {
-        :type => 'BLAH',
-        :egg => 33
+      name: 'ismael',
+      tagid: 1,
+      properties: {
+        type: 'BLAH',
+        egg: 33
       }
     }
 
     @to   = {
-      :tag_id => 1,
-      :chicken => 33,
-      :tag_attributes => {
-        :name => 'ismael',
-        :type => 'BLAH'
+      tag_id: 1,
+      chicken: 33,
+      tag_attributes: {
+        name: 'ismael',
+        type: 'BLAH'
       }
     }
   end
@@ -76,13 +76,13 @@ describe 'coercing types' do
 
   before :each do
     @from = {
-      :strings => {:a => '10'},
-      :integers =>{:b => 20}
+      strings: {a: '10'},
+      integers: {b: 20}
     }
 
     @to   = {
-      :integers => {:a => 10},
-      :strings  => {:b => '20'}
+      integers: {a: 10},
+      strings: {b: '20'}
     }
   end
 
@@ -100,20 +100,20 @@ end
 describe 'arrays in hashes' do
   before :each do
     @from = {
-      :name => ['ismael','sachiyo'],
-      :tagid => 1,
-      :properties => {
-        :type => 'BLAH',
-        :egg => 33
+      name: ['ismael','sachiyo'],
+      tagid: 1,
+      properties: {
+        type: 'BLAH',
+        egg: 33
       }
     }
 
     @to   = {
-      :tag_id => 1,
-      :chicken => 33,
-      :tag_attributes => {
-        :name => ['ismael','sachiyo'],
-        :type => 'BLAH'
+      tag_id: 1,
+      chicken: 33,
+      tag_attributes: {
+        name: ['ismael','sachiyo'],
+        type: 'BLAH'
       }
     }
   end
@@ -133,15 +133,15 @@ end
 describe "array indexes" do
   before :each do
     @from = {
-      :arrays => {
-        :names => ['ismael','celis'],
-        :company => 'New Bamboo'
+      arrays: {
+        names: ['ismael','celis'],
+        company: 'New Bamboo'
       }
     }
-    @to ={
-      :first_name => 'ismael',
-      :last_name => 'celis',
-      :work       => {:company => 'New Bamboo'}
+    @to = {
+      first_name: 'ismael',
+      last_name: 'celis',
+      work: {company: 'New Bamboo'}
     }
   end
 
@@ -156,7 +156,7 @@ end
 
 class PersonWithBlock
   extend HashMapper
-  def self.normalize(h)
+  def self.normalize(*_)
     super
   end
   map from('/names/first'){|n| n.gsub('+','')}, to('/first_name'){|n| "+++#{n}+++"}
@@ -166,13 +166,13 @@ class PersonWithBlockOneWay
   map from('/names/first'), to('/first_name') do |n| "+++#{n}+++" end
 end
 
-describe "with blocks filters" do
+describe "with block filters" do
   before :each do
     @from = {
-      :names => {:first => 'Ismael'}
+      names: {first: 'Ismael'}
     }
     @to = {
-      :first_name => '+++Ismael+++'
+      first_name: '+++Ismael+++'
     }
   end
 
@@ -200,14 +200,14 @@ end
 describe "with nested mapper" do
   before :each do
     @from ={
-      :name => 'HashMapper',
-      :author_hash => {
-        :names => {:first => 'Ismael'}
+      name: 'HashMapper',
+      author_hash: {
+        names: {first: 'Ismael'}
       }
     }
     @to = {
-      :project_name => 'HashMapper',
-      :author => {:first_name => '+++Ismael+++'}
+      project_name: 'HashMapper',
+      author: {first_name: '+++Ismael+++'}
     }
   end
 
@@ -240,19 +240,19 @@ end
 describe "with arrays of nested hashes" do
   before :each do
     @from = {
-      :name => 'New Bamboo',
-      :employees => [
-        {:names => {:first => 'Ismael'}},
-        {:names => {:first => 'Sachiyo'}},
-        {:names => {:first => 'Pedro'}}
+      name: 'New Bamboo',
+      employees: [
+        {names: {first: 'Ismael'}},
+        {names: {first: 'Sachiyo'}},
+        {names: {first: 'Pedro'}}
       ]
     }
     @to = {
-      :company_name => 'New Bamboo',
-      :employees => [
-        {:first_name => '+++Ismael+++'},
-        {:first_name => '+++Sachiyo+++'},
-        {:first_name => '+++Pedro+++'}
+      company_name: 'New Bamboo',
+      employees: [
+        {first_name: '+++Ismael+++'},
+        {first_name: '+++Sachiyo+++'},
+        {first_name: '+++Pedro+++'}
       ]
     }
   end
@@ -278,12 +278,12 @@ end
 describe "with non-matching maps" do
   before :all do
     @input = {
-      :exists => 1,
-      :exists_as_nil => nil,
-      :doesnt_exist => 2
+      exists: 1,
+      exists_as_nil: nil,
+      doesnt_exist: 2
     }
     @output = {
-      :exists_yahoo => 1
+      exists_yahoo: 1
     }
   end
 
@@ -295,8 +295,8 @@ end
 describe "with false values" do
 
   it "should include values in output" do
-    expect(NoKeys.normalize({'exists' => false})).to eq({:exists_yahoo => false})
-    expect(NoKeys.normalize({:exists => false})).to eq({:exists_yahoo => false})
+    expect(NoKeys.normalize({'exists' => false})).to eq({exists_yahoo: false})
+    expect(NoKeys.normalize({exists: false})).to eq({exists_yahoo: false})
   end
 
 end
@@ -304,7 +304,7 @@ end
 describe "with nil values" do
 
   it "should not include values in output" do
-    expect(NoKeys.normalize({:exists => nil})).to eq({})
+    expect(NoKeys.normalize({exists: nil})).to eq({})
     expect(NoKeys.normalize({'exists' => nil})).to eq({})
   end
 
@@ -341,14 +341,15 @@ end
 
 describe "before and after filters" do
   before(:all) do
-    @denorm = {:hello   => 'wassup?!'}
-    @norm   = {:goodbye => 'seeya later!'}
+    @denorm = {hello: 'wassup?!'}
+    @norm   = {goodbye: 'seeya later!'}
   end
+
   it "should allow filtering before normalize" do
-    expect(WithBeforeFilters.normalize(@denorm)).to eq({:goodbye => 'wassup?!', :extra => 'extra wassup?! innit'})
+    expect(WithBeforeFilters.normalize(@denorm)).to eq({goodbye: 'wassup?!', extra: 'extra wassup?! innit'})
   end
   it "should allow filtering before denormalize" do
-    expect(WithBeforeFilters.denormalize(@norm)).to eq({:hello => 'changed'})
+    expect(WithBeforeFilters.denormalize(@norm)).to eq({hello: 'changed'})
   end
   it "should allow filtering after normalize" do
     expect(WithAfterFilters.normalize(@denorm)).to eq([[:goodbye, 'wassup?!']])
@@ -356,7 +357,6 @@ describe "before and after filters" do
   it "should allow filtering after denormalize" do
     expect(WithAfterFilters.denormalize(@norm)).to eq({})
   end
-
 end
 
 class NotRelated
@@ -380,13 +380,13 @@ end
 describe "inherited mappers" do
   before :all do
     @from = {
-      :a => 'a',
-      :b => 'b',
-      :c => 'c'
+      a: 'a',
+      b: 'b',
+      c: 'c'
     }
     @to_b ={
-      :a => {:a => 'a'},
-      :b => {:b => 'b'}
+      a: {a: 'a'},
+      b: {b: 'b'}
     }
 
   end
@@ -396,7 +396,7 @@ describe "inherited mappers" do
   end
 
   it "should not affect other mappers" do
-    expect(NotRelated.normalize('n' => 'nn')).to eq({:n => {:n => 'nn'}})
+    expect(NotRelated.normalize('n' => 'nn')).to eq({n: {n: 'nn'}})
   end
 end
 
@@ -412,16 +412,14 @@ describe "dealing with strings and symbols" do
     expect(MixedMappings.normalize(
       'big' => {'jobs' => 5},
       'timble' => 3.2
-    )).to eq({:dodo  => 5,
-                   :bingo => {:biscuit => 3.2}})
+    )).to eq({dodo: 5, bingo: {biscuit: 3.2}})
   end
 
   it "should not symbolized keys in value hashes" do
     expect(MixedMappings.normalize(
       'big' => {'jobs' => 5},
       'timble' => {'string key' => 'value'}
-    )).to eq({:dodo  => 5,
-                   :bingo => {:biscuit => {'string key' => 'value'}}})
+    )).to eq({dodo: 5, bingo: {biscuit: {'string key' => 'value'}}})
   end
 
 end
