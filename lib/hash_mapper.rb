@@ -40,6 +40,8 @@ end
 
 module HashMapper
   DEFAULT_OPTIONS = {}.freeze
+  NO_VALUE = :hash_mapper_no_value
+  NO_DEFAULT = :hash_mapper_no_default
 
   def self.extended(base)
     base.class_eval do
@@ -130,7 +132,7 @@ module HashMapper
       @path_from = path_from
       @path_to = path_to
       @delegated_mapper = options.fetch(:using, nil)
-      @default_value = options.fetch(:default, :hash_mapper_no_default)
+      @default_value = options.fetch(:default, NO_DEFAULT)
     end
 
     def process_into(output, input, method_name: :normalize, context: nil)
@@ -147,15 +149,15 @@ module HashMapper
         else
           v = h[e]
         end
-        return :hash_mapper_no_value if v.nil?
+        return NO_VALUE if v.nil?
         v
       end
       delegated_mapper ? delegate_to_nested_mapper(value, method_name, context: context) : value
     end
 
     def set_value_in_output(output, path, value)
-      if value == :hash_mapper_no_value
-        if default_value == :hash_mapper_no_default
+      if value == NO_VALUE
+        if default_value == NO_DEFAULT
           return
         else
           value = default_value
@@ -169,7 +171,7 @@ module HashMapper
       when Array
         value.map {|v| delegated_mapper.public_send(method_name, v, context: context)}
       when nil
-        return :hash_mapper_no_value
+        return NO_VALUE
       else
         delegated_mapper.public_send(method_name, value, context: context)
       end
