@@ -1,4 +1,4 @@
-[ ![Codeship Status for ismasan/hash_mapper](https://www.codeship.io/projects/85d172c0-4668-0132-e925-7a7d3d72b19b/status)](https://www.codeship.io/projects/45296)
+[![GitHub Actions status](https://github.com/ismasan/hash_mapper/workflows/Tests/badge.svg)](https://github.com/ismasan/hash_mapper)
 
 # hash_mapper
 
