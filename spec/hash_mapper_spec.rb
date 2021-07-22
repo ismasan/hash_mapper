@@ -187,7 +187,20 @@ describe "with block filters" do
   it "should accept a block for just one direction" do
     expect(PersonWithBlockOneWay.normalize(@from)).to eq(@to)
   end
+end
 
+describe ':filter' do
+  let(:mapper) do
+    Class.new do
+      extend HashMapper
+      map from('/names/first'), to('/first_name', filter: ->(s) { s.strip })
+    end
+  end
+
+  it 'registers filters as callables, too' do
+    output = mapper.normalize({ names: { first: ' Joe Bloggs  ' }})
+    expect(output[:first_name]).to eq('Joe Bloggs')
+  end
 end
 
 class ProjectMapper

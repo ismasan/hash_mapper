@@ -59,15 +59,17 @@ module HashMapper
     end
   end
 
-  def map(from, to, options={}, &filter)
+  def map(from, to, options={}, &block_filter)
+    filter = options.delete(:filter) || block_filter
     self.maps = self.maps.dup
     self.maps << Map.new(from, to, options)
-    to.filter = filter if block_given? # Useful if just one block given
+    to.filter = filter if filter # Useful if just one block given
   end
 
-  def from(path, &filter)
+  def from(path, filter: nil, &block_filter)
     path_map = PathMap.new(path)
-    path_map.filter = filter if block_given? # Useful if two blocks given
+    filter ||= block_filter if block_given?
+    path_map.filter = filter if filter # Useful if two blocks given
     path_map
   end
 
