@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'hash_mapper/version'
 
 $:.unshift(File.dirname(__FILE__)) unless
@@ -138,7 +140,7 @@ module HashMapper
     def process_into(output, input, method_name: :normalize, context: nil)
       path_1, path_2 = (method_name == :normalize ? [path_from, path_to] : [path_to, path_from])
       value = get_value_from_input(output, input, path_1, method_name: method_name, context: context)
-      set_value_in_output(output, path_2, value)
+      set_value_in_output(output, path_2, value, context: context)
     end
     protected
 
@@ -155,7 +157,7 @@ module HashMapper
       delegated_mapper ? delegate_to_nested_mapper(value, method_name, context: context) : value
     end
 
-    def set_value_in_output(output, path, value)
+    def set_value_in_output(output, path, value, context: context)
       if value == NO_VALUE
         if default_value == NO_DEFAULT
           return
@@ -163,7 +165,7 @@ module HashMapper
           value = default_value
         end
       end
-      add_value_to_hash!(output, path, value)
+      add_value_to_hash!(output, path, value, context: context)
     end
 
     def delegate_to_nested_mapper(value, method_name, context:)
@@ -177,13 +179,13 @@ module HashMapper
       end
     end
 
-    def add_value_to_hash!(hash, path, value)
+    def add_value_to_hash!(hash, path, value, context: nil)
       path.inject_with_index(hash) do |h,e,i|
         if !h[e].nil? # it can be FALSE
           h[e]
         else
           h[e] = if i == path.size-1
-            path.apply_filter(value)
+            path.apply_filter(value, context: context)
           else
             if path.segments[i+1].is_a? Integer
               []
@@ -204,17 +206,24 @@ module HashMapper
     include Enumerable
 
     attr_reader :segments
-    attr_writer :filter
     attr_reader :path
 
     def initialize(path)
       @path = path.dup
       @segments = parse(path)
       @filter = lambda{|value| value}# default filter does nothing
+      @filter_arity = 1
     end
 
-    def apply_filter(value)
-      @filter.call(value)
+    def filter=(f)
+      @filter_arity = f.respond_to?(:arity) ? f.arity : 1
+      @filter = f
+    end
+
+    def apply_filter(value, context: nil)
+      args = [value]
+      args << context if @filter_arity > 1
+      @filter.call(*args)
     end
 
     def each(&blk)

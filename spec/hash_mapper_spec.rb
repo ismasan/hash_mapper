@@ -628,3 +628,19 @@ describe 'passing custom context object' do
     expect(ctx[:names]).to eq(%w(Ismael Joe))
   end
 end
+
+describe 'passing context down to filters' do
+  it 'yields context to filters' do
+    mapper = Class.new do
+      extend HashMapper
+
+      map from('/name'), to('/name', &(->(name, ctx) { "#{ctx[:title]} #{name}" }))
+      map from('/age'), to('/age') do |age, ctx|
+        "#{age} #{ctx[:age_suffix]}"
+      end
+    end
+
+    output = mapper.normalize({ name: 'Ismael', age: 43 }, context: { title: 'Mr.', age_suffix: 'years old' })
+    expect(output).to eq({ name: 'Mr. Ismael', age: '43 years old' })
+  end
+end
