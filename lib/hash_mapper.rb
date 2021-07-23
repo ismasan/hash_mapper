@@ -157,7 +157,7 @@ module HashMapper
       delegated_mapper ? delegate_to_nested_mapper(value, method_name, context: context) : value
     end
 
-    def set_value_in_output(output, path, value, context: context)
+    def set_value_in_output(output, path, value, context: nil)
       if value == NO_VALUE
         if default_value == NO_DEFAULT
           return
