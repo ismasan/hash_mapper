@@ -647,7 +647,7 @@ describe 'passing context down to filters' do
     mapper = Class.new do
       extend HashMapper
 
-      map from('/name'), to('/name', &(->(name, ctx) { "#{ctx[:title]} #{name}" }))
+      map from('/name'), to('/name', filter: ->(name, ctx) { "#{ctx[:title]} #{name}" })
       map from('/age'), to('/age') do |age, ctx|
         "#{age} #{ctx[:age_suffix]}"
       end
