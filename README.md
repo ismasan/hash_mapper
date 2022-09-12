@@ -1,4 +1,4 @@
-[![GitHub Actions status](https://github.com/ismasan/hash_mapper/workflows/Tests/badge.svg)](https://github.com/ismasan/hash_mapper)
+[![GitHub Actions status](https://github.com/ismasan/hash_mapper/workflows/Tests/badge.svg?123)](https://github.com/ismasan/hash_mapper)
 
 # hash_mapper
 
