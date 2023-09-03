@@ -11,6 +11,8 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  config.example_status_persistence_file_path = "spec/examples.txt"
 end
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')

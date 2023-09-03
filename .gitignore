@@ -2,5 +2,6 @@
 .bundle
 Gemfile.lock
 pkg/*
+/spec/examples.txt
 .idea
 .rvmrc
