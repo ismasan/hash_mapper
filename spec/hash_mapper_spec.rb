@@ -1,5 +1,3 @@
-require 'spec_helper.rb'
-
 class OneLevel
   extend HashMapper
   map from('/name'),            to('/nombre')
