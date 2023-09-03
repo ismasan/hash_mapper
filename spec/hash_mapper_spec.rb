@@ -154,7 +154,7 @@ end
 
 class PersonWithBlock
   extend HashMapper
-  def self.normalize(*_)
+  def self.normalize(*_, **_)
     super
   end
   map from('/names/first'){|n| n.gsub('+','')}, to('/first_name'){|n| "+++#{n}+++"}
