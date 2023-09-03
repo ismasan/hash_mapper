@@ -1,5 +1,3 @@
-require 'spec_helper.rb'
-
 class OneLevel
   extend HashMapper
   map from('/name'),            to('/nombre')
@@ -156,7 +154,7 @@ end
 
 class PersonWithBlock
   extend HashMapper
-  def self.normalize(*_)
+  def self.normalize(*_, **_)
     super
   end
   map from('/names/first'){|n| n.gsub('+','')}, to('/first_name'){|n| "+++#{n}+++"}
@@ -396,7 +394,7 @@ describe "inherited mappers" do
   end
 
   it "should not affect other mappers" do
-    expect(NotRelated.normalize('n' => 'nn')).to eq({n: {n: 'nn'}})
+    expect(NotRelated.normalize({ 'n' => 'nn' })).to eq({n: {n: 'nn'}})
   end
 end
 
@@ -409,17 +407,17 @@ end
 describe "dealing with strings and symbols" do
 
   it "should be able to normalize from a nested hash with string keys" do
-    expect(MixedMappings.normalize(
+    expect(MixedMappings.normalize({
       'big' => {'jobs' => 5},
       'timble' => 3.2
-    )).to eq({dodo: 5, bingo: {biscuit: 3.2}})
+    })).to eq({dodo: 5, bingo: {biscuit: 3.2}})
   end
 
   it "should not symbolized keys in value hashes" do
-    expect(MixedMappings.normalize(
+    expect(MixedMappings.normalize({
       'big' => {'jobs' => 5},
       'timble' => {'string key' => 'value'}
-    )).to eq({dodo: 5, bingo: {biscuit: {'string key' => 'value'}}})
+    })).to eq({dodo: 5, bingo: {biscuit: {'string key' => 'value'}}})
   end
 
 end
@@ -433,9 +431,9 @@ end
 
 describe "default values" do
   it "should use a default value whenever a key is not set" do
-    expect(DefaultValues.normalize(
+    expect(DefaultValues.normalize({
       'without_default' => 'some_value'
-    )).to eq({ not_defaulted: 'some_value', defaulted: 'the_default_value' })
+    })).to eq({ not_defaulted: 'some_value', defaulted: 'the_default_value' })
   end
 
   it "should not use a default if a key is set (even if the value is falsy)" do
