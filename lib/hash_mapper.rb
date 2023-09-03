@@ -2,9 +2,6 @@
 
 require 'hash_mapper/version'
 
-$:.unshift(File.dirname(__FILE__)) unless
-$:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
-
 def require_active_support
   require 'active_support/core_ext/array/extract_options'
   require 'active_support/core_ext/hash/indifferent_access'
