@@ -8,11 +8,10 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - '2.6'
-          - '2.7'
+          - '3.2.2'
     name: Ruby ${{ matrix.ruby }} RSpec
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: ruby/setup-ruby@v1
       with:
         bundler-cache: true
