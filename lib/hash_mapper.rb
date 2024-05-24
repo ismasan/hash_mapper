@@ -71,6 +71,10 @@ module HashMapper
     path_map
   end
 
+  def import_mapper(mapper)
+    self.maps = self.maps + mapper.maps.dup
+  end
+
   alias :to :from
 
   def using(mapper_class)

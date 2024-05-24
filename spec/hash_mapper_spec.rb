@@ -446,6 +446,25 @@ describe "default values" do
   end
 end
 
+describe '.import_mapper(another_mapper)' do
+  let(:mapper) do
+    Class.new do
+      extend HashMapper
+
+      import_mapper DefaultValues
+      map from('/name'), to('/nombre')
+    end
+  end
+
+  it 'imports the mappings from another mapper' do
+    expect(mapper.maps.size).to eq(3)
+    expect(mapper.normalize({
+      'without_default' => 'some_value',
+      'name' => 'ismael'
+    })).to eq({ not_defaulted: 'some_value', defaulted: 'the_default_value', nombre: 'ismael' })
+  end
+end
+
 class MultiBeforeFilter
   extend HashMapper
 
