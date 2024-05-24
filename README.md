@@ -306,6 +306,24 @@ EggMapper.normalize({}, options: { no_default: true })
 EggMapper.denormalize({fried: 4})
 ```
 
+#### Importing mappings from another mapper
+
+Use `.import_mapper(another_mapper)` to import mappings from another mapper. This is useful when you want to reuse mappings from another mapper.
+
+```ruby
+class Mapper1
+  extend HashMapper
+  map from('/name'), to('/name')
+end
+
+class Mapper2
+  extend HashMapper
+  import_mapper Mapper1
+  map from('/age'), to('/age')
+end
+
+# Mapper2 will have mappings from Mapper1 ('/name' => '/name') and its own mappings ('/age' => '/age')
+```
 
 ## REQUIREMENTS:
 
